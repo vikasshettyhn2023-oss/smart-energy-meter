@@ -1,320 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Smart Energy Meter</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Exo+2:wght@300;400;600&display=swap" rel="stylesheet"/>
 
-<h2 class="sr-only">Smart Energy Meter Dashboard — live readings, billing, and relay control</h2>
-
-<style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: var(--font-sans); }
-.dash { padding: 1rem 0; }
-.topbar {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 12px 16px;
-  background: var(--color-background-primary);
-  border: 0.5px solid var(--color-border-tertiary);
-  border-radius: var(--border-radius-lg);
-  margin-bottom: 16px;
-}
-.topbar-title { font-size: 15px; font-weight: 500; color: var(--color-text-primary); display:flex; align-items:center; gap:8px; }
-.topbar-right { display:flex; align-items:center; gap:12px; font-size:13px; color:var(--color-text-secondary); }
-.dot { width:8px; height:8px; border-radius:50%; background:#639922; display:inline-block; margin-right:4px; }
-.dot.off { background:#E24B4A; }
-
-.alert-box {
-  display:none; padding: 10px 16px;
-  background: var(--color-background-danger);
-  border: 0.5px solid var(--color-border-danger);
-  border-radius: var(--border-radius-md);
-  color: var(--color-text-danger);
-  font-size:13px; margin-bottom:16px;
-  align-items:center; gap:8px;
-}
-.alert-box.show { display:flex; }
-
-.sensor-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 10px; margin-bottom: 16px;
-}
-.metric-card {
-  background: var(--color-background-secondary);
-  border-radius: var(--border-radius-md);
-  padding: 14px 16px;
-}
-.metric-label { font-size: 12px; color: var(--color-text-secondary); margin-bottom: 6px; letter-spacing: 0.3px; }
-.metric-value { font-size: 22px; font-weight: 500; color: var(--color-text-primary); font-family: var(--font-mono); }
-.metric-unit { font-size: 12px; color: var(--color-text-tertiary); margin-top: 2px; }
-.metric-card.info .metric-value { color: var(--color-text-info); }
-.metric-card.success .metric-value { color: var(--color-text-success); }
-.metric-card.warning .metric-value { color: var(--color-text-warning); }
-
-.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 16px; }
-@media(max-width:580px) { .two-col { grid-template-columns: 1fr; } }
-
-.panel {
-  background: var(--color-background-primary);
-  border: 0.5px solid var(--color-border-tertiary);
-  border-radius: var(--border-radius-lg);
-  padding: 16px;
-}
-.panel-title { font-size: 13px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 14px; display:flex; align-items:center; gap:6px; }
-
-.balance-big { font-size: 32px; font-weight: 500; color: var(--color-text-success); font-family: var(--font-mono); margin-bottom: 4px; }
-.balance-sub { font-size: 12px; color: var(--color-text-secondary); margin-bottom: 12px; }
-
-.bar-bg { background: var(--color-background-secondary); border-radius: 4px; height:6px; margin-bottom:14px; overflow:hidden; }
-.bar-fill { height:100%; border-radius:4px; background:#639922; transition: width 0.5s ease; }
-.bar-fill.warn { background: #BA7517; }
-.bar-fill.danger { background: #E24B4A; }
-
-.bill-row { display:flex; justify-content:space-between; padding: 8px 0; border-bottom: 0.5px solid var(--color-border-tertiary); font-size:13px; }
-.bill-row:last-of-type { border-bottom: none; }
-.bill-row .lbl { color: var(--color-text-secondary); }
-.bill-row .val { font-weight: 500; color: var(--color-text-primary); font-family: var(--font-mono); }
-
-.recharge-row { display:flex; gap:8px; margin-top:12px; }
-.recharge-row input { flex:1; }
-.recharge-msg { font-size:12px; color: var(--color-text-success); margin-top:6px; min-height:18px; }
-
-.relay-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-.relay-card {
-  background: var(--color-background-secondary);
-  border-radius: var(--border-radius-md);
-  padding: 12px;
-}
-.relay-name { font-size:12px; color:var(--color-text-secondary); margin-bottom:4px; }
-.relay-type { font-size:11px; color:var(--color-text-tertiary); margin-bottom:8px; }
-.badge { display:inline-block; font-size:11px; padding:2px 8px; border-radius:4px; font-weight:500; margin-bottom:6px; }
-.badge.on  { background: var(--color-background-success); color: var(--color-text-success); }
-.badge.off { background: var(--color-background-danger);  color: var(--color-text-danger); }
-.badge.auto{ background: var(--color-background-info);    color: var(--color-text-info); }
-
-.toggle-row { display:flex; align-items:center; gap:8px; }
-.sw { position:relative; width:40px; height:22px; flex-shrink:0; }
-.sw input { opacity:0; width:0; height:0; }
-.sw-track {
-  position:absolute; inset:0; border-radius:22px; cursor:pointer;
-  background: var(--color-background-secondary);
-  border: 0.5px solid var(--color-border-secondary);
-  transition:0.2s;
-}
-.sw-track::before {
-  content:''; position:absolute;
-  width:16px; height:16px; border-radius:50%;
-  left:3px; top:3px;
-  background: var(--color-text-tertiary);
-  transition:0.2s;
-}
-.sw input:checked + .sw-track { background:#3B6D11; border-color:#3B6D11; }
-.sw input:checked + .sw-track::before { transform:translateX(18px); background:#fff; }
-.sw-label { font-size:12px; color:var(--color-text-secondary); }
-
-.footer { text-align:center; font-size:12px; color:var(--color-text-tertiary); padding-top:12px; }
-
-.pulse { animation: blink 1.5s infinite; }
-@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.4} }
-</style>
-
-<div class="dash">
-
-  <div class="topbar">
-    <div class="topbar-title">
-      <i class="ti ti-bolt" aria-hidden="true" style="font-size:18px; color:var(--color-text-warning)"></i>
-      Smart energy meter
-    </div>
-    <div class="topbar-right">
-      <span><span class="dot pulse" id="wifiDot"></span><span id="wifiTxt">Connecting...</span></span>
-      <span id="lastUpd">--:--:--</span>
-    </div>
-  </div>
-
-  <div class="alert-box" id="alertBox">
-    <i class="ti ti-alert-triangle" style="font-size:16px; flex-shrink:0"></i>
-    <span id="alertTxt"></span>
-  </div>
-
-  <div class="sensor-grid">
-    <div class="metric-card info">
-      <div class="metric-label">Voltage</div>
-      <div class="metric-value" id="v">--</div>
-      <div class="metric-unit">Volts (V)</div>
-    </div>
-    <div class="metric-card success">
-      <div class="metric-label">Current</div>
-      <div class="metric-value" id="i">--</div>
-      <div class="metric-unit">Amperes (A)</div>
-    </div>
-    <div class="metric-card info">
-      <div class="metric-label">Active power</div>
-      <div class="metric-value" id="pw">--</div>
-      <div class="metric-unit">Watts (W)</div>
-    </div>
-    <div class="metric-card success">
-      <div class="metric-label">Energy</div>
-      <div class="metric-value" id="en">--</div>
-      <div class="metric-unit">kWh</div>
-    </div>
-    <div class="metric-card warning">
-      <div class="metric-label">Frequency</div>
-      <div class="metric-value" id="fr">--</div>
-      <div class="metric-unit">Hertz (Hz)</div>
-    </div>
-    <div class="metric-card warning">
-      <div class="metric-label">Power factor</div>
-      <div class="metric-value" id="pf">--</div>
-      <div class="metric-unit">cos φ</div>
-    </div>
-  </div>
-
-  <div class="two-col">
-
-    <div class="panel">
-      <div class="panel-title"><i class="ti ti-credit-card" aria-hidden="true" style="font-size:16px"></i> Prepaid billing</div>
-      <div class="balance-big">₹<span id="bal">--</span></div>
-      <div class="balance-sub">Available balance</div>
-      <div class="bar-bg"><div class="bar-fill" id="balBar" style="width:100%"></div></div>
-      <div class="bill-row"><span class="lbl">Total cost</span><span class="val">₹<span id="cost">0.00</span></span></div>
-      <div class="bill-row"><span class="lbl">Rate</span><span class="val">₹<span id="rate">6.50</span>/kWh</span></div>
-      <div class="bill-row"><span class="lbl">Energy used</span><span class="val"><span id="enBill">0.000</span> kWh</span></div>
-      <div class="recharge-row">
-        <input type="number" id="rAmt" placeholder="Enter ₹ amount" min="1"/>
-        <button onclick="doRecharge()">Recharge</button>
-      </div>
-      <div class="recharge-msg" id="rMsg"></div>
-    </div>
-
-    <div class="panel">
-      <div class="panel-title"><i class="ti ti-plug" aria-hidden="true" style="font-size:16px"></i> Relay control</div>
-      <div class="relay-grid">
-
-        <div class="relay-card">
-          <div class="relay-name">Relay 1</div>
-          <div class="relay-type">Main cutoff</div>
-          <div class="badge auto" id="r1Badge">Auto</div>
-          <div style="font-size:11px;color:var(--color-text-tertiary)">Controlled by protection system</div>
-        </div>
-
-        <div class="relay-card">
-          <div class="relay-name">Relay 2</div>
-          <div class="relay-type">Home automation</div>
-          <div class="badge off" id="r2Badge">Off</div>
-          <div class="toggle-row">
-            <label class="sw"><input type="checkbox" id="r2" onchange="setRelay(2)"><span class="sw-track"></span></label>
-            <span class="sw-label" id="r2Lbl">Off</span>
-          </div>
-        </div>
-
-        <div class="relay-card">
-          <div class="relay-name">Relay 3</div>
-          <div class="relay-type">Home automation</div>
-          <div class="badge off" id="r3Badge">Off</div>
-          <div class="toggle-row">
-            <label class="sw"><input type="checkbox" id="r3" onchange="setRelay(3)"><span class="sw-track"></span></label>
-            <span class="sw-label" id="r3Lbl">Off</span>
-          </div>
-        </div>
-
-        <div class="relay-card">
-          <div class="relay-name">Relay 4</div>
-          <div class="relay-type">Home automation</div>
-          <div class="badge off" id="r4Badge">Off</div>
-          <div class="toggle-row">
-            <label class="sw"><input type="checkbox" id="r4" onchange="setRelay(4)"><span class="sw-track"></span></label>
-            <span class="sw-label" id="r4Lbl">Off</span>
-          </div>
-        </div>
-
-      </div>
-    </div>
-  </div>
-
-  <div class="footer">Smart Energy Meter G7 &nbsp;·&nbsp; Auto-refresh every 5s &nbsp;·&nbsp; Firebase Realtime DB</div>
-</div>
-
+<!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+<style>
+  :root {
+    --bg:        #050d1a;
+    --panel:     #0a1628;
+    --border:    #0d3060;
+    --accent:    #00c8ff;
+    --accent2:   #00ff9d;
+    --warn:      #ffb300;
+    --danger:    #ff3d3d;
+    --text:      #cde8ff;
+    --subtext:   #4a7fa5;
+    --glow:      0 0 18px #00c8ff55;
+    --glow2:     0 0 18px #00ff9d55;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Exo 2', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Animated grid background */
+  body::before {
+    content:'';
+    position:fixed;
+    inset:0;
+    background-image:
+      linear-gradient(rgba(0,200,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,200,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events:none;
+    z-index:0;
+  }
+
+  .container { position:relative; z-index:1; max-width:1200px; margin:0 auto; padding:20px; }
+
+  /* ── HEADER ── */
+  header {
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding: 20px 30px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 30px;
+    background: linear-gradient(90deg, #0a1628, #051020);
+    border-radius: 12px;
+    box-shadow: var(--glow);
+  }
+
+  .logo {
+    font-family: 'Orbitron', monospace;
+    font-size: 1.4rem;
+    font-weight: 900;
+    color: var(--accent);
+    text-shadow: 0 0 20px var(--accent);
+    letter-spacing: 2px;
+  }
+
+  .logo span { color: var(--accent2); }
+
+  .status-bar {
+    display:flex;
+    align-items:center;
+    gap: 20px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.8rem;
+  }
+
+  .status-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--accent2);
+    box-shadow: 0 0 10px var(--accent2);
+    animation: pulse 1.5s infinite;
+  }
+
+  .status-dot.offline { background: var(--danger); box-shadow: 0 0 10px var(--danger); }
+
+  @keyframes pulse {
+    0%,100% { opacity:1; transform:scale(1); }
+    50%      { opacity:0.5; transform:scale(0.8); }
+  }
+
+  /* ── ALERT BANNER ── */
+  .alert-banner {
+    display:none;
+    background: linear-gradient(90deg, #3d0000, #1a0000);
+    border: 1px solid var(--danger);
+    border-radius: 10px;
+    padding: 15px 25px;
+    margin-bottom: 20px;
+    font-family: 'Orbitron', monospace;
+    color: var(--danger);
+    font-size: 0.9rem;
+    text-align:center;
+    box-shadow: 0 0 20px #ff3d3d44;
+    animation: alertPulse 1s infinite;
+  }
+
+  @keyframes alertPulse {
+    0%,100% { border-color: var(--danger); }
+    50%      { border-color: transparent; }
+  }
+
+  .alert-banner.show { display:block; }
+
+  /* ── SENSOR GRID ── */
+  .section-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.75rem;
+    color: var(--subtext);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 15px;
+    padding-left: 10px;
+    border-left: 3px solid var(--accent);
+  }
+
+  .sensor-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+    margin-bottom: 30px;
+  }
+
+  .sensor-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    position:relative;
+    overflow:hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .sensor-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--glow);
+  }
+
+  .sensor-card::before {
+    content:'';
+    position:absolute;
+    top:0; left:0; right:0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), transparent);
+  }
+
+  .sensor-card.green::before { background: linear-gradient(90deg, var(--accent2), transparent); }
+  .sensor-card.warn::before  { background: linear-gradient(90deg, var(--warn), transparent); }
+
+  .sensor-label {
+    font-size: 0.72rem;
+    color: var(--subtext);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    font-family: 'Share Tech Mono', monospace;
+  }
+
+  .sensor-value {
+    font-family: 'Orbitron', monospace;
+    font-size: 1.9rem;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1;
+  }
+
+  .sensor-card.green .sensor-value { color: var(--accent2); }
+  .sensor-card.warn  .sensor-value { color: var(--warn); }
+
+  .sensor-unit {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--subtext);
+    margin-top: 5px;
+  }
+
+  /* ── BOTTOM GRID ── */
+  .bottom-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 30px;
+  }
+
+  @media(max-width:700px) { .bottom-grid { grid-template-columns:1fr; } }
+
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 25px;
+  }
+
+  .panel-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.8rem;
+    color: var(--accent);
+    letter-spacing: 2px;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+  }
+
+  /* ── BILLING ── */
+  .balance-display {
+    font-family: 'Orbitron', monospace;
+    font-size: 2.8rem;
+    font-weight: 900;
+    color: var(--accent2);
+    text-shadow: 0 0 20px var(--accent2);
+    margin-bottom: 5px;
+  }
+
+  .balance-label {
+    font-size: 0.75rem;
+    color: var(--subtext);
+    letter-spacing: 2px;
+    margin-bottom: 20px;
+    font-family: 'Share Tech Mono', monospace;
+  }
+
+  .balance-bar-bg {
+    background: #0d2040;
+    border-radius: 6px;
+    height: 8px;
+    margin-bottom: 20px;
+    overflow:hidden;
+  }
+
+  .balance-bar {
+    height: 100%;
+    border-radius: 6px;
+    background: linear-gradient(90deg, var(--accent2), var(--accent));
+    transition: width 0.5s ease;
+    box-shadow: 0 0 10px var(--accent2);
+  }
+
+  .billing-row {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.85rem;
+  }
+
+  .billing-row:last-child { border-bottom:none; }
+  .billing-row .label { color: var(--subtext); font-family:'Share Tech Mono',monospace; }
+  .billing-row .value { color: var(--text); font-weight:600; }
+
+  /* Recharge */
+  .recharge-section { margin-top: 20px; }
+
+  .recharge-input-row {
+    display:flex;
+    gap: 10px;
+    margin-top: 10px;
+  }
+
+  .recharge-input {
+    flex:1;
+    background: #051020;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 15px;
+    color: var(--text);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 1rem;
+    outline:none;
+    transition: border-color 0.2s;
+  }
+
+  .recharge-input:focus { border-color: var(--accent2); box-shadow: var(--glow2); }
+
+  .btn {
+    background: linear-gradient(135deg, var(--accent2), #00a870);
+    color: #000;
+    border:none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-family: 'Orbitron', monospace;
+    font-size: 0.75rem;
+    font-weight:700;
+    cursor:pointer;
+    letter-spacing:1px;
+    transition: transform 0.1s, box-shadow 0.2s;
+  }
+
+  .btn:hover { transform:scale(1.04); box-shadow: var(--glow2); }
+  .btn:active { transform:scale(0.97); }
+
+  .btn.danger {
+    background: linear-gradient(135deg, var(--danger), #a00);
+    color:#fff;
+  }
+
+  /* ── RELAY CONTROL ── */
+  .relay-grid {
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+  }
+
+  .relay-card {
+    background: #051020;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 15px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+
+  .relay-name {
+    font-family:'Share Tech Mono',monospace;
+    font-size:0.75rem;
+    color: var(--subtext);
+    letter-spacing:1px;
+  }
+
+  .relay-badge {
+    font-family:'Orbitron',monospace;
+    font-size:0.7rem;
+    padding: 3px 8px;
+    border-radius:4px;
+    display:inline-block;
+    margin-bottom:5px;
+  }
+
+  .relay-badge.on  { background:#00ff9d22; color:var(--accent2); border:1px solid var(--accent2); }
+  .relay-badge.off { background:#ff3d3d22; color:var(--danger);  border:1px solid var(--danger); }
+  .relay-badge.auto{ background:#00c8ff22; color:var(--accent);  border:1px solid var(--accent); }
+
+  /* Toggle Switch */
+  .toggle-wrap { display:flex; align-items:center; gap:10px; }
+
+  .toggle {
+    position:relative;
+    width:46px; height:24px;
+  }
+
+  .toggle input { opacity:0; width:0; height:0; }
+
+  .slider {
+    position:absolute;
+    inset:0;
+    background:#0d2040;
+    border-radius:24px;
+    cursor:pointer;
+    border:1px solid var(--border);
+    transition:0.3s;
+  }
+
+  .slider::before {
+    content:'';
+    position:absolute;
+    width:18px; height:18px;
+    left:3px; top:2px;
+    background:#4a7fa5;
+    border-radius:50%;
+    transition:0.3s;
+  }
+
+  input:checked + .slider { background:#00ff9d33; border-color:var(--accent2); }
+  input:checked + .slider::before { transform:translateX(22px); background:var(--accent2); box-shadow:0 0 8px var(--accent2); }
+
+  .toggle-label {
+    font-family:'Share Tech Mono',monospace;
+    font-size:0.75rem;
+    color:var(--subtext);
+  }
+
+  /* ── LAST UPDATE ── */
+  .footer {
+    text-align:center;
+    font-family:'Share Tech Mono',monospace;
+    font-size:0.75rem;
+    color:var(--subtext);
+    padding: 20px;
+    border-top:1px solid var(--border);
+    margin-top:10px;
+  }
+
+  /* Scan line effect */
+  .scan-line {
+    position:fixed;
+    top:0; left:0; right:0;
+    height:2px;
+    background:linear-gradient(90deg,transparent,var(--accent),transparent);
+    animation: scan 4s linear infinite;
+    opacity:0.3;
+    pointer-events:none;
+    z-index:999;
+  }
+
+  @keyframes scan {
+    0%   { top:0; }
+    100% { top:100vh; }
+  }
+
+  /* Number flip animation */
+  @keyframes numFlip {
+    0%   { opacity:0; transform:translateY(-8px); }
+    100% { opacity:1; transform:translateY(0); }
+  }
+
+  .sensor-value.updated { animation: numFlip 0.3s ease; }
+
+  /* Recharge success */
+  .recharge-msg {
+    font-family:'Share Tech Mono',monospace;
+    font-size:0.8rem;
+    margin-top:8px;
+    min-height:18px;
+    color:var(--accent2);
+  }
+</style>
+</head>
+<body>
+
+<div class="scan-line"></div>
+
+<div class="container">
+
+  <!-- HEADER -->
+  <header>
+    <div class="logo">⚡ SMART <span>ENERGY</span> METER</div>
+    <div class="status-bar">
+      <div class="status-dot" id="wifiDot"></div>
+      <span id="wifiStatus" style="color:var(--accent2)">CONNECTING...</span>
+      <span style="color:var(--border)">|</span>
+      <span id="lastUpdate" style="color:var(--subtext)">--:--:--</span>
+    </div>
+  </header>
+
+  <!-- ALERT BANNER -->
+  <div class="alert-banner" id="alertBanner">
+    ⚠ ALERT: <span id="alertText"></span>
+  </div>
+
+  <!-- SENSOR READINGS -->
+  <div class="section-title">LIVE SENSOR READINGS</div>
+  <div class="sensor-grid">
+    <div class="sensor-card">
+      <div class="sensor-label">VOLTAGE</div>
+      <div class="sensor-value" id="voltage">--</div>
+      <div class="sensor-unit">VOLTS (V)</div>
+    </div>
+    <div class="sensor-card green">
+      <div class="sensor-label">CURRENT</div>
+      <div class="sensor-value" id="current">--</div>
+      <div class="sensor-unit">AMPERES (A)</div>
+    </div>
+    <div class="sensor-card">
+      <div class="sensor-label">ACTIVE POWER</div>
+      <div class="sensor-value" id="power">--</div>
+      <div class="sensor-unit">WATTS (W)</div>
+    </div>
+    <div class="sensor-card green">
+      <div class="sensor-label">ENERGY</div>
+      <div class="sensor-value" id="energy">--</div>
+      <div class="sensor-unit">KILOWATT-HOUR</div>
+    </div>
+    <div class="sensor-card warn">
+      <div class="sensor-label">FREQUENCY</div>
+      <div class="sensor-value" id="frequency">--</div>
+      <div class="sensor-unit">HERTZ (Hz)</div>
+    </div>
+    <div class="sensor-card warn">
+      <div class="sensor-label">POWER FACTOR</div>
+      <div class="sensor-value" id="pf">--</div>
+      <div class="sensor-unit">COS φ</div>
+    </div>
+  </div>
+
+  <!-- BOTTOM GRID -->
+  <div class="bottom-grid">
+
+    <!-- BILLING PANEL -->
+    <div class="panel">
+      <div class="panel-title">💳 PREPAID BILLING</div>
+
+      <div class="balance-display">₹<span id="balance">--</span></div>
+      <div class="balance-label">AVAILABLE BALANCE</div>
+
+      <div class="balance-bar-bg">
+        <div class="balance-bar" id="balanceBar" style="width:100%"></div>
+      </div>
+
+      <div class="billing-row">
+        <span class="label">TOTAL COST</span>
+        <span class="value">₹<span id="totalCost">0.00</span></span>
+      </div>
+      <div class="billing-row">
+        <span class="label">RATE</span>
+        <span class="value">₹<span id="costPerUnit">6.50</span>/kWh</span>
+      </div>
+      <div class="billing-row">
+        <span class="label">ENERGY USED</span>
+        <span class="value"><span id="energyBill">0.000</span> kWh</span>
+      </div>
+
+      <!-- Recharge -->
+      <div class="recharge-section">
+        <div class="billing-row" style="border:none;padding-bottom:0;">
+          <span class="label">RECHARGE WALLET</span>
+        </div>
+        <div class="recharge-input-row">
+          <input type="number" class="recharge-input" id="rechargeAmt"
+                 placeholder="Enter ₹ amount" min="1" max="10000"/>
+          <button class="btn" onclick="rechargeBalance()">RECHARGE</button>
+        </div>
+        <div class="recharge-msg" id="rechargeMsg"></div>
+      </div>
+    </div>
+
+    <!-- RELAY CONTROL -->
+    <div class="panel">
+      <div class="panel-title">🔌 RELAY CONTROL</div>
+      <div class="relay-grid">
+
+        <!-- Relay 1 - Auto only -->
+        <div class="relay-card">
+          <div class="relay-name">RELAY 1</div>
+          <div style="font-size:0.7rem;color:var(--subtext);margin-bottom:5px;">MAIN CUTOFF</div>
+          <div class="relay-badge auto" id="relay1Badge">AUTO</div>
+          <div style="font-size:0.7rem;color:var(--subtext);margin-top:5px;">
+            Auto controlled by protection system
+          </div>
+        </div>
+
+        <!-- Relay 2 -->
+        <div class="relay-card">
+          <div class="relay-name">RELAY 2</div>
+          <div style="font-size:0.7rem;color:var(--subtext);margin-bottom:5px;">HOME AUTO</div>
+          <div class="relay-badge off" id="relay2Badge">OFF</div>
+          <div class="toggle-wrap" style="margin-top:8px;">
+            <label class="toggle">
+              <input type="checkbox" id="relay2Toggle" onchange="toggleRelay(2)"/>
+              <span class="slider"></span>
+            </label>
+            <span class="toggle-label" id="relay2Label">OFF</span>
+          </div>
+        </div>
+
+        <!-- Relay 3 -->
+        <div class="relay-card">
+          <div class="relay-name">RELAY 3</div>
+          <div style="font-size:0.7rem;color:var(--subtext);margin-bottom:5px;">HOME AUTO</div>
+          <div class="relay-badge off" id="relay3Badge">OFF</div>
+          <div class="toggle-wrap" style="margin-top:8px;">
+            <label class="toggle">
+              <input type="checkbox" id="relay3Toggle" onchange="toggleRelay(3)"/>
+              <span class="slider"></span>
+            </label>
+            <span class="toggle-label" id="relay3Label">OFF</span>
+          </div>
+        </div>
+
+        <!-- Relay 4 -->
+        <div class="relay-card">
+          <div class="relay-name">RELAY 4</div>
+          <div style="font-size:0.7rem;color:var(--subtext);margin-bottom:5px;">HOME AUTO</div>
+          <div class="relay-badge off" id="relay4Badge">OFF</div>
+          <div class="toggle-wrap" style="margin-top:8px;">
+            <label class="toggle">
+              <input type="checkbox" id="relay4Toggle" onchange="toggleRelay(4)"/>
+              <span class="slider"></span>
+            </label>
+            <span class="toggle-label" id="relay4Label">OFF</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    SMART ENERGY METER G7 &nbsp;|&nbsp; 
+    PROJECT: VIKAS &nbsp;|&nbsp;
+    FIREBASE: smart-energy-meter-g7 &nbsp;|&nbsp;
+    AUTO REFRESH: 5s
+  </div>
+
+</div>
+
 <script>
-const cfg = {
-  apiKey:"AIzaSyCYQ2R_dOHa2MgVYvIuoGzZzo7hnKrqMQ4",
-  authDomain:"smart-energy-meter-g7.firebaseapp.com",
-  databaseURL:"https://smart-energy-meter-g7-default-rtdb.firebaseio.com",
-  projectId:"smart-energy-meter-g7",
-  storageBucket:"smart-energy-meter-g7.firebasestorage.app",
-  messagingSenderId:"1053683554755",
-  appId:"1:1053683554755:web:cf24d65a9b2c187e3d4576"
+// ── FIREBASE CONFIG ──────────────────────
+const firebaseConfig = {
+  apiKey: "AIzaSyCYQ2R_dOHa2MgVYvIuoGzZzo7hnKrqMQ4",
+  authDomain: "smart-energy-meter-g7.firebaseapp.com",
+  databaseURL: "https://smart-energy-meter-g7-default-rtdb.firebaseio.com",
+  projectId: "smart-energy-meter-g7",
+  storageBucket: "smart-energy-meter-g7.firebasestorage.app",
+  messagingSenderId: "1053683554755",
+  appId: "1:1053683554755:web:cf24d65a9b2c187e3d4576"
 };
-firebase.initializeApp(cfg);
+
+firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-function sv(id, val, dec=1) {
+// ── UPDATE SENSOR VALUE ──────────────────
+function updateVal(id, val, decimals=1) {
   const el = document.getElementById(id);
-  if(el) el.textContent = isNaN(val) ? '0' : parseFloat(val).toFixed(dec);
+  const newVal = isNaN(val) ? '0' : parseFloat(val).toFixed(decimals);
+  if (el.textContent !== newVal) {
+    el.textContent = newVal;
+    el.classList.remove('updated');
+    void el.offsetWidth;
+    el.classList.add('updated');
+  }
 }
 
-function setBadge(n, state) {
-  const b = document.getElementById('r'+n+'Badge');
-  if(!b) return;
-  if(n===1){ b.textContent=state?'On':'Off'; b.className='badge '+(state?'on':'off'); return; }
-  b.textContent = state?'On':'Off';
-  b.className = 'badge '+(state?'on':'off');
-  const t = document.getElementById('r'+n);
-  const l = document.getElementById('r'+n+'Lbl');
-  if(t) t.checked = state;
-  if(l) l.textContent = state?'On':'Off';
+// ── RELAY BADGE ──────────────────────────
+function updateRelayBadge(num, state) {
+  const badge = document.getElementById('relay' + num + 'Badge');
+  if (num === 1) {
+    badge.textContent = state ? 'ON' : 'OFF';
+    badge.className   = 'relay-badge ' + (state ? 'on' : 'off');
+    return;
+  }
+  badge.textContent = state ? 'ON' : 'OFF';
+  badge.className   = 'relay-badge ' + (state ? 'on' : 'off');
+
+  const toggle = document.getElementById('relay' + num + 'Toggle');
+  const label  = document.getElementById('relay' + num + 'Label');
+  if (toggle) toggle.checked = state;
+  if (label)  label.textContent = state ? 'ON' : 'OFF';
 }
 
-function setRelay(n) {
-  const state = document.getElementById('r'+n).checked;
-  db.ref('/relay/relay'+n).set(state);
-  setBadge(n, state);
+// ── TOGGLE RELAY ─────────────────────────
+function toggleRelay(num) {
+  const toggle = document.getElementById('relay' + num + 'Toggle');
+  const state  = toggle.checked;
+  db.ref('/relay/relay' + num).set(state);
+  updateRelayBadge(num, state);
 }
 
-function doRecharge() {
-  const amt = parseFloat(document.getElementById('rAmt').value);
-  const msg = document.getElementById('rMsg');
-  if(!amt||amt<=0){ msg.style.color='var(--color-text-danger)'; msg.textContent='Enter a valid amount'; return; }
+// ── RECHARGE ─────────────────────────────
+function rechargeBalance() {
+  const amt = parseFloat(document.getElementById('rechargeAmt').value);
+  const msg = document.getElementById('rechargeMsg');
+
+  if (!amt || amt <= 0) {
+    msg.style.color = 'var(--danger)';
+    msg.textContent = '⚠ Enter valid amount!';
+    return;
+  }
+
   db.ref('/billing/recharge').set(amt);
-  msg.style.color='var(--color-text-success)';
-  msg.textContent='₹'+amt.toFixed(2)+' recharge sent!';
-  document.getElementById('rAmt').value='';
-  setTimeout(()=>msg.textContent='', 4000);
+  msg.style.color = 'var(--accent2)';
+  msg.textContent = '✓ Recharge of ₹' + amt.toFixed(2) + ' sent!';
+  document.getElementById('rechargeAmt').value = '';
+
+  setTimeout(() => msg.textContent = '', 4000);
 }
 
-db.ref('/sensor').on('value', s=>{
-  const d=s.val(); if(!d) return;
-  sv('v',  d.voltage,   1);
-  sv('i',  d.current,   2);
-  sv('pw', d.power,     1);
-  sv('en', d.energy,    3);
-  sv('fr', d.frequency, 1);
-  sv('pf', d.pf,        2);
-  sv('enBill', d.energy, 3);
-  document.getElementById('lastUpd').textContent = new Date().toLocaleTimeString();
-  const dot = document.getElementById('wifiDot');
-  dot.className='dot pulse';
-  document.getElementById('wifiTxt').textContent='Online';
+// ── LISTEN FIREBASE ──────────────────────
+function listenFirebase() {
+
+  // Sensor data
+  db.ref('/sensor').on('value', snap => {
+    const d = snap.val();
+    if (!d) return;
+    updateVal('voltage',   d.voltage,   1);
+    updateVal('current',   d.current,   2);
+    updateVal('power',     d.power,     1);
+    updateVal('energy',    d.energy,    3);
+    updateVal('frequency', d.frequency, 1);
+    updateVal('pf',        d.pf,        2);
+    updateVal('energyBill',d.energy,    3);
+
+    // Update time
+    const now = new Date();
+    document.getElementById('lastUpdate').textContent =
+      now.toLocaleTimeString();
+
+    // WiFi online
+    document.getElementById('wifiDot').className = 'status-dot';
+    document.getElementById('wifiStatus').textContent = 'ONLINE';
+    document.getElementById('wifiStatus').style.color = 'var(--accent2)';
+  });
+
+  // Billing data
+  db.ref('/billing').on('value', snap => {
+    const d = snap.val();
+    if (!d) return;
+
+    const bal  = parseFloat(d.balance  || 0);
+    const max  = 500; // max balance for bar
+    const pct  = Math.min((bal / max) * 100, 100);
+
+    document.getElementById('balance').textContent     = bal.toFixed(2);
+    document.getElementById('totalCost').textContent   = parseFloat(d.totalCost  || 0).toFixed(2);
+    document.getElementById('costPerUnit').textContent = parseFloat(d.costPerUnit|| 6.5).toFixed(2);
+
+    // Balance bar color
+    const bar = document.getElementById('balanceBar');
+    bar.style.width = pct + '%';
+    if (bal < 20)  bar.style.background = 'linear-gradient(90deg, var(--danger), #a00)';
+    else if (bal < 50) bar.style.background = 'linear-gradient(90deg, var(--warn), #a07000)';
+    else bar.style.background = 'linear-gradient(90deg, var(--accent2), var(--accent))';
+  });
+
+  // Relay states
+  db.ref('/relay').on('value', snap => {
+    const d = snap.val();
+    if (!d) return;
+    updateRelayBadge(1, d.relay1);
+    updateRelayBadge(2, d.relay2);
+    updateRelayBadge(3, d.relay3);
+    updateRelayBadge(4, d.relay4);
+  });
+
+  // Alerts
+  db.ref('/alerts/message').on('value', snap => {
+    const msg    = snap.val() || '';
+    const banner = document.getElementById('alertBanner');
+    if (msg && msg.length > 0) {
+      document.getElementById('alertText').textContent = msg;
+      banner.classList.add('show');
+    } else {
+      banner.classList.remove('show');
+    }
+  });
+}
+
+// ── START ────────────────────────────────
+listenFirebase();
+
+// Offline detection
+window.addEventListener('offline', () => {
+  document.getElementById('wifiDot').className = 'status-dot offline';
+  document.getElementById('wifiStatus').textContent = 'OFFLINE';
+  document.getElementById('wifiStatus').style.color = 'var(--danger)';
 });
 
-db.ref('/billing').on('value', s=>{
-  const d=s.val(); if(!d) return;
-  const bal = parseFloat(d.balance||0);
-  sv('bal',  bal, 2);
-  sv('cost', d.totalCost||0, 2);
-  sv('rate', d.costPerUnit||6.5, 2);
-  const pct = Math.min((bal/500)*100, 100);
-  const bar = document.getElementById('balBar');
-  bar.style.width = pct+'%';
-  bar.className = 'bar-fill'+(bal<20?' danger':bal<50?' warn':'');
-});
-
-db.ref('/relay').on('value', s=>{
-  const d=s.val(); if(!d) return;
-  setBadge(1,d.relay1); setBadge(2,d.relay2);
-  setBadge(3,d.relay3); setBadge(4,d.relay4);
-});
-
-db.ref('/alerts/message').on('value', s=>{
-  const m=s.val()||'';
-  const box=document.getElementById('alertBox');
-  document.getElementById('alertTxt').textContent=m;
-  box.className='alert-box'+(m?' show':'');
+window.addEventListener('online', () => {
+  document.getElementById('wifiDot').className = 'status-dot';
+  document.getElementById('wifiStatus').textContent = 'ONLINE';
+  document.getElementById('wifiStatus').style.color = 'var(--accent2)';
 });
 </script>
+</body>
+</html>
