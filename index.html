@@ -4,229 +4,460 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Smart Energy Meter</title>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet"/>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <style>
-:root{--bg:#04080f;--panel:#080f1c;--panel2:#0b1525;--border:#0e3060;--border2:#153870;--accent:#00d4ff;--accent2:#00ff9d;--warn:#ffb300;--danger:#ff4444;--text:#c8e0f4;--sub:#3d6080;--sub2:#5a85a8;--glow:0 0 24px #00d4ff33;--glow2:0 0 24px #00ff9d33;--gdanger:0 0 24px #ff444433;}
-*{margin:0;padding:0;box-sizing:border-box;}html{scroll-behavior:smooth;}
-body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;min-height:100vh;overflow-x:hidden;}
-body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,212,255,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,0.025) 1px,transparent 1px);background-size:50px 50px;pointer-events:none;z-index:0;}
-body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 20% 20%,rgba(0,80,120,0.15) 0%,transparent 60%),radial-gradient(ellipse at 80% 80%,rgba(0,40,80,0.15) 0%,transparent 60%);pointer-events:none;z-index:0;}
-.page{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:16px 16px 40px;}
-.scanline{position:fixed;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--accent),transparent);animation:scan 6s linear infinite;opacity:0.15;pointer-events:none;z-index:9999;}
+/* ── ROOT ── */
+:root {
+  --bg:      #04080f;
+  --panel:   #080f1c;
+  --panel2:  #0b1525;
+  --b1:      #0e3060;
+  --b2:      #153870;
+  --acc:     #00d4ff;
+  --grn:     #00ff9d;
+  --warn:    #ffb300;
+  --red:     #ff4444;
+  --txt:     #c8e0f4;
+  --sub:     #3d6080;
+  --sub2:    #5a85a8;
+  --glow:    0 0 20px #00d4ff30;
+  --glow2:   0 0 20px #00ff9d30;
+  --glowr:   0 0 20px #ff444430;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+body {
+  background:var(--bg);
+  color:var(--txt);
+  font-family:'Rajdhani',sans-serif;
+  min-height:100vh;
+  overflow-x:hidden;
+}
+body::before {
+  content:'';
+  position:fixed;inset:0;
+  background-image:
+    linear-gradient(rgba(0,212,255,.025) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,212,255,.025) 1px,transparent 1px);
+  background-size:50px 50px;
+  pointer-events:none;z-index:0;
+}
+.page {
+  position:relative;z-index:1;
+  max-width:1100px;margin:0 auto;
+  padding:14px 14px 50px;
+}
+
+/* ── SCANLINE ── */
+.scanline {
+  position:fixed;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--acc),transparent);
+  animation:scan 6s linear infinite;
+  opacity:.12;pointer-events:none;z-index:9999;
+}
 @keyframes scan{0%{top:-1%}100%{top:101%}}
-header{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;background:linear-gradient(135deg,#080f1c,#04080f);border:1px solid var(--border);border-radius:14px;margin-bottom:20px;box-shadow:var(--glow),inset 0 1px 0 rgba(0,212,255,0.1);position:sticky;top:10px;z-index:100;backdrop-filter:blur(10px);}
-.logo{font-family:'Orbitron',monospace;font-size:1.05rem;font-weight:900;color:var(--accent);text-shadow:0 0 30px var(--accent);letter-spacing:3px;display:flex;align-items:center;gap:10px;}
-.logo-icon{width:30px;height:30px;border:2px solid var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;box-shadow:var(--glow);animation:lp 2s infinite;}
-@keyframes lp{0%,100%{box-shadow:var(--glow)}50%{box-shadow:0 0 40px #00d4ff66}}
-.logo span{color:var(--accent2);}
-.hbar{display:flex;align-items:center;gap:14px;}
-.hstatus{display:flex;align-items:center;gap:8px;font-family:'Share Tech Mono',monospace;font-size:0.7rem;}
-.dot{width:8px;height:8px;border-radius:50%;background:var(--accent2);box-shadow:0 0 10px var(--accent2);animation:dp 1.5s infinite;}
-.dot.off{background:var(--danger);box-shadow:0 0 10px var(--danger);}
-@keyframes dp{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(0.7);opacity:0.5}}
+
+/* ── HEADER ── */
+header {
+  display:flex;align-items:center;justify-content:space-between;
+  padding:13px 20px;
+  background:linear-gradient(135deg,#080f1c,#050b14);
+  border:1px solid var(--b1);border-radius:14px;
+  margin-bottom:18px;
+  box-shadow:var(--glow),inset 0 1px 0 rgba(0,212,255,.08);
+  position:sticky;top:10px;z-index:100;
+  backdrop-filter:blur(12px);
+}
+.logo {
+  font-family:'Orbitron',monospace;
+  font-size:1rem;font-weight:900;
+  color:var(--acc);
+  text-shadow:0 0 25px var(--acc);
+  letter-spacing:3px;
+  display:flex;align-items:center;gap:10px;
+}
+.logo-icon {
+  width:28px;height:28px;
+  border:2px solid var(--acc);border-radius:7px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;
+  box-shadow:var(--glow);
+  animation:lp 2s ease-in-out infinite;
+}
+@keyframes lp{0%,100%{box-shadow:var(--glow)}50%{box-shadow:0 0 35px #00d4ff55}}
+.logo span{color:var(--grn);}
+.hright {
+  display:flex;align-items:center;gap:14px;
+  font-family:'Share Tech Mono',monospace;font-size:.68rem;
+}
+.dot {
+  width:8px;height:8px;border-radius:50%;
+  background:var(--grn);box-shadow:0 0 10px var(--grn);
+  animation:dp 1.5s ease-in-out infinite;display:inline-block;
+}
+.dot.off{background:var(--red);box-shadow:0 0 10px var(--red);}
+@keyframes dp{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+
+/* ── MENU ── */
 .menu-wrap{position:relative;}
-.menu-btn{width:36px;height:36px;background:transparent;border:1px solid var(--border2);border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:4px;transition:all 0.2s;}
-.menu-btn:hover{border-color:var(--accent);box-shadow:var(--glow);}
-.menu-btn span{display:block;width:4px;height:4px;border-radius:50%;background:var(--text);}
-.dropdown{position:absolute;top:44px;right:0;background:#080f1c;border:1px solid var(--border2);border-radius:12px;padding:8px;min-width:210px;display:none;z-index:999;box-shadow:0 8px 32px rgba(0,0,0,0.6),var(--glow);}
-.dropdown.open{display:block;animation:ddo 0.2s ease;}
-@keyframes ddo{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
-.dd-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;cursor:pointer;font-family:'Orbitron',monospace;font-size:0.65rem;letter-spacing:1px;color:var(--sub2);transition:all 0.15s;}
-.dd-item:hover{background:rgba(0,212,255,0.08);color:var(--accent);}
-.alert-banner{display:none;background:linear-gradient(135deg,#2a0000,#150000);border:1px solid var(--danger);border-radius:12px;padding:14px 20px;margin-bottom:20px;color:var(--danger);font-family:'Orbitron',monospace;font-size:0.8rem;text-align:center;letter-spacing:1px;box-shadow:var(--gdanger);animation:ab 1s infinite;}
-@keyframes ab{0%,100%{border-color:var(--danger)}50%{border-color:rgba(255,68,68,0.3)}}
+.menu-btn {
+  width:34px;height:34px;background:transparent;
+  border:1px solid var(--b2);border-radius:8px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  flex-direction:column;gap:4px;transition:all .2s;
+}
+.menu-btn:hover{border-color:var(--acc);box-shadow:var(--glow);}
+.menu-btn span{display:block;width:4px;height:4px;border-radius:50%;background:var(--txt);}
+.dropdown {
+  position:absolute;top:42px;right:0;
+  background:#080f1c;border:1px solid var(--b2);
+  border-radius:12px;padding:8px;
+  min-width:205px;display:none;z-index:999;
+  box-shadow:0 8px 30px rgba(0,0,0,.6),var(--glow);
+}
+.dropdown.open{display:block;animation:ddo .18s ease;}
+@keyframes ddo{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+.dd-item {
+  display:flex;align-items:center;gap:10px;
+  padding:9px 13px;border-radius:8px;cursor:pointer;
+  font-family:'Orbitron',monospace;font-size:.63rem;
+  letter-spacing:1px;color:var(--sub2);transition:all .15s;
+}
+.dd-item:hover{background:rgba(0,212,255,.07);color:var(--acc);}
+
+/* ── ALERT BANNER ── */
+.alert-banner {
+  display:none;
+  background:linear-gradient(135deg,#2a0000,#150000);
+  border:1px solid var(--red);border-radius:12px;
+  padding:13px 20px;margin-bottom:18px;
+  color:var(--red);
+  font-family:'Orbitron',monospace;font-size:.78rem;
+  text-align:center;letter-spacing:1px;
+  box-shadow:var(--glowr);
+  animation:ablink 1s ease infinite;
+}
+@keyframes ablink{0%,100%{border-color:var(--red)}50%{border-color:rgba(255,68,68,.2)}}
 .alert-banner.show{display:block;}
-.section{margin-bottom:28px;}
-.stitle{font-family:'Orbitron',monospace;font-size:0.66rem;color:var(--sub2);letter-spacing:4px;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:12px;}
-.stitle::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--border2),transparent);}
-.divider{height:1px;background:linear-gradient(90deg,transparent,var(--border2),transparent);margin:6px 0 22px;}
-.sgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
-@media(max-width:580px){.sgrid{grid-template-columns:repeat(2,1fr);}}
-.scard{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 14px;position:relative;overflow:hidden;transition:transform 0.2s,box-shadow 0.2s;}
+
+/* ── SECTION ── */
+.section{margin-bottom:26px;}
+.stitle {
+  font-family:'Orbitron',monospace;font-size:.63rem;
+  color:var(--sub2);letter-spacing:4px;text-transform:uppercase;
+  margin-bottom:13px;
+  display:flex;align-items:center;gap:12px;
+}
+.stitle::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--b2),transparent);}
+.divider{height:1px;background:linear-gradient(90deg,transparent,var(--b2),transparent);margin:5px 0 20px;}
+
+/* ── SENSOR CARDS ── */
+.sgrid {
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:11px;
+}
+@media(max-width:560px){.sgrid{grid-template-columns:repeat(2,1fr);}}
+.scard {
+  background:var(--panel);border:1px solid var(--b1);
+  border-radius:12px;padding:15px 13px;
+  position:relative;overflow:hidden;
+  transition:transform .2s,box-shadow .2s;
+}
 .scard:hover{transform:translateY(-2px);box-shadow:var(--glow);}
-.scard::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),transparent);}
-.scard.g::before{background:linear-gradient(90deg,var(--accent2),transparent);}
+.scard::before {
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--acc),transparent);
+}
+.scard.g::before{background:linear-gradient(90deg,var(--grn),transparent);}
 .scard.w::before{background:linear-gradient(90deg,var(--warn),transparent);}
-.cc{position:absolute;top:10px;right:10px;width:18px;height:18px;border-top:1px solid var(--border2);border-right:1px solid var(--border2);border-radius:0 4px 0 0;opacity:0.4;}
-.slabel{font-size:0.63rem;color:var(--sub2);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;font-family:'Share Tech Mono',monospace;}
-.sval{font-family:'Orbitron',monospace;font-size:1.55rem;font-weight:700;color:var(--accent);line-height:1;}
-.scard.g .sval{color:var(--accent2);}.scard.w .sval{color:var(--warn);}
-.sunit{font-family:'Share Tech Mono',monospace;font-size:0.66rem;color:var(--sub);margin-top:5px;}
-.two{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.scard.danger{border-color:var(--red);box-shadow:var(--glowr);}
+.scard.danger::before{background:linear-gradient(90deg,var(--red),transparent);}
+.cc {
+  position:absolute;top:8px;right:8px;
+  width:16px;height:16px;
+  border-top:1px solid var(--b2);border-right:1px solid var(--b2);
+  border-radius:0 4px 0 0;opacity:.4;
+}
+.slbl{font-size:.62rem;color:var(--sub2);letter-spacing:2px;text-transform:uppercase;margin-bottom:7px;font-family:'Share Tech Mono',monospace;}
+.sval{font-family:'Orbitron',monospace;font-size:1.45rem;font-weight:700;color:var(--acc);line-height:1;}
+.scard.g .sval{color:var(--grn);}
+.scard.w .sval{color:var(--warn);}
+.scard.danger .sval{color:var(--red);}
+.sunit{font-family:'Share Tech Mono',monospace;font-size:.63rem;color:var(--sub);margin-top:4px;}
+
+/* ── TWO COL ── */
+.two{display:grid;grid-template-columns:1fr 1fr;gap:15px;}
 @media(max-width:640px){.two{grid-template-columns:1fr;}}
-.panel{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:20px;}
-.ptitle{font-family:'Orbitron',monospace;font-size:0.7rem;color:var(--accent);letter-spacing:2px;margin-bottom:14px;text-transform:uppercase;display:flex;align-items:center;gap:8px;}
-.ptitle.g{color:var(--accent2);}
-.ptitle.tg{color:#2AABEE;}
-.modetog{display:flex;gap:6px;background:#04080f;border:1px solid var(--border);border-radius:10px;padding:4px;margin-bottom:18px;}
-.mbtn{flex:1;padding:8px 4px;background:transparent;border:none;border-radius:7px;cursor:pointer;font-family:'Orbitron',monospace;font-size:0.63rem;color:var(--sub2);letter-spacing:1px;transition:all 0.25s;}
-.mbtn.active{background:var(--accent);color:#000;font-weight:700;box-shadow:var(--glow);}
-.mbtn.active.post{background:var(--accent2);box-shadow:var(--glow2);}
-.bignum{font-family:'Orbitron',monospace;font-size:2.1rem;font-weight:900;color:var(--accent2);text-shadow:0 0 30px var(--accent2);margin-bottom:3px;}
-.bignum.blue{color:var(--accent);text-shadow:0 0 30px var(--accent);}
-.bigsub{font-size:0.66rem;color:var(--sub);font-family:'Share Tech Mono',monospace;letter-spacing:2px;margin-bottom:14px;}
-.barwrap{background:#04080f;border-radius:6px;height:6px;margin-bottom:16px;overflow:hidden;border:1px solid var(--border);}
-.barfill{height:100%;border-radius:6px;background:linear-gradient(90deg,var(--accent2),var(--accent));transition:width 0.6s;box-shadow:0 0 12px var(--accent2);}
-.barfill.w{background:linear-gradient(90deg,var(--warn),#a07000);box-shadow:0 0 12px var(--warn);}
-.barfill.d{background:linear-gradient(90deg,var(--danger),#a00);box-shadow:0 0 12px var(--danger);}
-.brow{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid rgba(14,48,96,0.5);font-size:0.83rem;}
-.brow:last-of-type{border-bottom:none;}.bl{color:var(--sub2);}
-.bv{font-family:'Share Tech Mono',monospace;font-weight:600;color:var(--text);}
-.rrow{display:flex;gap:8px;margin-top:14px;}
-.inp{flex:1;background:#04080f;border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-family:'Share Tech Mono',monospace;font-size:0.88rem;outline:none;transition:border-color 0.2s;}
-.inp:focus{border-color:var(--accent2);box-shadow:var(--glow2);}
+
+/* ── PANEL ── */
+.panel{background:var(--panel);border:1px solid var(--b1);border-radius:14px;padding:18px;}
+.ptitle{font-family:'Orbitron',monospace;font-size:.68rem;color:var(--acc);letter-spacing:2px;margin-bottom:14px;text-transform:uppercase;}
+.ptitle.g{color:var(--grn);}
+
+/* ── MODE TOGGLE ── */
+.modetog{display:flex;gap:5px;background:#04080f;border:1px solid var(--b1);border-radius:10px;padding:4px;margin-bottom:16px;}
+.mbtn{flex:1;padding:7px 4px;background:transparent;border:none;border-radius:7px;cursor:pointer;font-family:'Orbitron',monospace;font-size:.6rem;color:var(--sub2);letter-spacing:1px;transition:all .25s;}
+.mbtn.act{background:var(--acc);color:#000;font-weight:700;box-shadow:var(--glow);}
+.mbtn.act.p{background:var(--grn);box-shadow:var(--glow2);}
+
+/* BILLING NUMBERS */
+.bignum{font-family:'Orbitron',monospace;font-size:1.9rem;font-weight:900;color:var(--grn);text-shadow:0 0 25px var(--grn);margin-bottom:3px;}
+.bignum.b{color:var(--acc);text-shadow:0 0 25px var(--acc);}
+.bigsub{font-size:.63rem;color:var(--sub);font-family:'Share Tech Mono',monospace;letter-spacing:2px;margin-bottom:13px;}
+.barwrap{background:#04080f;border-radius:5px;height:5px;margin-bottom:14px;overflow:hidden;border:1px solid var(--b1);}
+.barfill{height:100%;border-radius:5px;background:linear-gradient(90deg,var(--grn),var(--acc));transition:width .6s;box-shadow:0 0 10px var(--grn);}
+.barfill.w{background:linear-gradient(90deg,var(--warn),#a07000);box-shadow:0 0 10px var(--warn);}
+.barfill.d{background:linear-gradient(90deg,var(--red),#a00);box-shadow:0 0 10px var(--red);}
+
+.brow{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(14,48,96,.4);font-size:.82rem;}
+.brow:last-of-type{border-bottom:none;}
+.bl{color:var(--sub2);}
+.bv{font-family:'Share Tech Mono',monospace;font-weight:600;color:var(--txt);}
+
+/* RECHARGE */
+.rrow{display:flex;gap:8px;margin-top:13px;}
+.inp{flex:1;background:#04080f;border:1px solid var(--b1);border-radius:8px;padding:8px 11px;color:var(--txt);font-family:'Share Tech Mono',monospace;font-size:.85rem;outline:none;transition:border-color .2s;}
+.inp:focus{border-color:var(--grn);box-shadow:var(--glow2);}
 .inp::placeholder{color:var(--sub);}
-.smallmsg{font-size:0.7rem;min-height:16px;margin-top:6px;font-family:'Share Tech Mono',monospace;color:var(--accent2);}
-.btn{background:linear-gradient(135deg,var(--accent2),#00a870);color:#000;border:none;border-radius:8px;padding:9px 16px;font-family:'Orbitron',monospace;font-size:0.63rem;font-weight:700;cursor:pointer;letter-spacing:1px;transition:transform 0.1s,box-shadow 0.2s;white-space:nowrap;}
-.btn:hover{transform:scale(1.04);box-shadow:var(--glow2);}.btn:active{transform:scale(0.97);}
-.btn.blue{background:linear-gradient(135deg,var(--accent),#0070a0);color:#000;}
-.btn.tg{background:linear-gradient(135deg,#2AABEE,#1a8bc4);color:#fff;}
-.btn.sm{padding:6px 11px;font-size:0.58rem;}
-.btn.full{width:100%;padding:12px;font-size:0.68rem;letter-spacing:2px;margin-top:10px;}
-.hgrid{display:flex;flex-direction:column;gap:10px;}
-.hcard{background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:13px 16px;display:flex;align-items:center;justify-content:space-between;transition:border-color 0.2s,box-shadow 0.2s;}
-.hcard.on{border-color:var(--accent2);box-shadow:0 0 12px rgba(0,255,157,0.1);}
-.hinfo{display:flex;align-items:center;gap:12px;}
-.hicon{width:34px;height:34px;border-radius:8px;background:#04080f;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:15px;transition:all 0.2s;}
-.hcard.on .hicon{border-color:var(--accent2);}
-.hname{font-family:'Orbitron',monospace;font-size:0.72rem;letter-spacing:1px;color:var(--text);}
-.htype{font-size:0.64rem;color:var(--sub);margin-top:2px;}
-.hright2{display:flex;align-items:center;gap:10px;}
-.badge{font-size:0.6rem;padding:3px 8px;border-radius:4px;font-family:'Orbitron',monospace;letter-spacing:1px;}
-.badge.on{background:rgba(0,255,157,0.1);color:var(--accent2);border:1px solid rgba(0,255,157,0.4);}
-.badge.off{background:rgba(255,68,68,0.1);color:var(--danger);border:1px solid rgba(255,68,68,0.4);}
-.badge.auto{background:rgba(0,212,255,0.1);color:var(--accent);border:1px solid rgba(0,212,255,0.4);}
-.tgl{position:relative;width:44px;height:24px;flex-shrink:0;}
-.tgl input{opacity:0;width:0;height:0;}
-.tslider{position:absolute;inset:0;background:#04080f;border-radius:24px;cursor:pointer;border:1px solid var(--border2);transition:0.3s;}
-.tslider::before{content:'';position:absolute;width:18px;height:18px;left:3px;top:3px;background:var(--sub);border-radius:50%;transition:0.3s;}
-input:checked+.tslider{background:rgba(0,255,157,0.15);border-color:var(--accent2);}
-input:checked+.tslider::before{transform:translateX(20px);background:var(--accent2);box-shadow:0 0 10px var(--accent2);}
+.smsg{font-size:.68rem;min-height:15px;margin-top:5px;font-family:'Share Tech Mono',monospace;color:var(--grn);}
+
+/* ── BUTTONS ── */
+.btn{border:none;border-radius:8px;padding:9px 16px;font-family:'Orbitron',monospace;font-size:.62rem;font-weight:700;cursor:pointer;letter-spacing:1px;transition:transform .1s,box-shadow .2s;white-space:nowrap;}
+.btn:hover{transform:scale(1.04);}
+.btn:active{transform:scale(.97);}
+.btn.green{background:linear-gradient(135deg,var(--grn),#00a870);color:#000;box-shadow:var(--glow2);}
+.btn.blue{background:linear-gradient(135deg,var(--acc),#0070a0);color:#000;}
+.btn.sm{padding:5px 10px;font-size:.57rem;}
+.btn.full{width:100%;padding:11px;font-size:.65rem;letter-spacing:2px;margin-top:9px;}
+
+/* ── RELAY CONTROL ── */
+.relay-grid{display:grid;grid-template-columns:1fr;gap:10px;}
+.relay-card{
+  background:var(--panel2);border:1px solid var(--b1);
+  border-radius:11px;padding:13px 16px;
+  display:flex;align-items:center;justify-content:space-between;
+  transition:border-color .2s,box-shadow .2s;
+}
+.relay-card.on{border-color:var(--grn);box-shadow:0 0 14px rgba(0,255,157,.1);}
+.relay-card.auto-on{border-color:var(--acc);box-shadow:0 0 14px rgba(0,212,255,.1);}
+.relay-card.auto-off{border-color:var(--red);box-shadow:0 0 14px rgba(255,68,68,.1);}
+.rinfo{display:flex;align-items:center;gap:12px;}
+.ricon{
+  width:36px;height:36px;border-radius:8px;
+  background:#04080f;border:1px solid var(--b1);
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;transition:all .2s;
+}
+.relay-card.on .ricon{border-color:var(--grn);}
+.relay-card.auto-on .ricon{border-color:var(--acc);}
+.relay-card.auto-off .ricon{border-color:var(--red);}
+.rname{font-family:'Orbitron',monospace;font-size:.7rem;letter-spacing:1px;color:var(--txt);}
+.rtype{font-size:.62rem;color:var(--sub);margin-top:2px;}
+
+/* ON/OFF Button Pair */
+.btn-pair{display:flex;gap:6px;}
+.btn-on{background:linear-gradient(135deg,var(--grn),#00a870);color:#000;border:none;border-radius:7px;padding:7px 14px;font-family:'Orbitron',monospace;font-size:.6rem;font-weight:700;cursor:pointer;letter-spacing:1px;transition:all .15s;opacity:.5;}
+.btn-off{background:linear-gradient(135deg,var(--red),#a00);color:#fff;border:none;border-radius:7px;padding:7px 14px;font-family:'Orbitron',monospace;font-size:.6rem;font-weight:700;cursor:pointer;letter-spacing:1px;transition:all .15s;opacity:.5;}
+.btn-on.active{opacity:1;box-shadow:var(--glow2);}
+.btn-off.active{opacity:1;box-shadow:var(--glowr);}
+.btn-on:hover{transform:scale(1.05);}
+.btn-off:hover{transform:scale(1.05);}
+
+/* Status badge */
+.status-badge{font-family:'Orbitron',monospace;font-size:.6rem;padding:3px 9px;border-radius:4px;letter-spacing:1px;}
+.status-badge.on{background:rgba(0,255,157,.1);color:var(--grn);border:1px solid rgba(0,255,157,.4);}
+.status-badge.off{background:rgba(255,68,68,.1);color:var(--red);border:1px solid rgba(255,68,68,.4);}
+.status-badge.auto{background:rgba(0,212,255,.1);color:var(--acc);border:1px solid rgba(0,212,255,.4);}
+
+/* ── HISTORY ── */
 .hist-table{width:100%;border-collapse:collapse;}
-.hist-table th{font-family:'Orbitron',monospace;font-size:0.6rem;color:var(--sub2);letter-spacing:2px;text-transform:uppercase;padding:10px 12px;text-align:left;border-bottom:1px solid var(--border2);}
-.hist-table td{padding:11px 12px;font-size:0.8rem;border-bottom:1px solid rgba(14,48,96,0.4);font-family:'Share Tech Mono',monospace;color:var(--text);}
-.hist-table tr:hover td{background:rgba(0,212,255,0.03);}
+.hist-table th{font-family:'Orbitron',monospace;font-size:.58rem;color:var(--sub2);letter-spacing:2px;text-transform:uppercase;padding:9px 11px;text-align:left;border-bottom:1px solid var(--b2);}
+.hist-table td{padding:10px 11px;font-size:.78rem;border-bottom:1px solid rgba(14,48,96,.35);font-family:'Share Tech Mono',monospace;color:var(--txt);}
+.hist-table tr:hover td{background:rgba(0,212,255,.03);}
 .hist-table tr:last-child td{border-bottom:none;}
-.mcol{color:var(--sub2);}.ccol{color:var(--accent2);font-weight:600;}
-.dlcol{display:flex;gap:6px;}
-.no-data{text-align:center;padding:30px;font-family:'Share Tech Mono',monospace;font-size:0.78rem;color:var(--sub);}
-.sform{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
-@media(max-width:500px){.sform{grid-template-columns:1fr;}}
-.fg{display:flex;flex-direction:column;gap:6px;}.fg.full{grid-column:1/-1;}
-.flbl{font-size:0.65rem;color:var(--sub2);letter-spacing:2px;font-family:'Share Tech Mono',monospace;text-transform:uppercase;}
-.finp{background:#04080f;border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-family:'Share Tech Mono',monospace;font-size:0.88rem;outline:none;transition:border-color 0.2s;width:100%;}
-.finp:focus{border-color:var(--accent);box-shadow:var(--glow);}
+.mcol{color:var(--sub2);}.ccol{color:var(--grn);font-weight:600;}
+.dlcol{display:flex;gap:5px;}
+.no-data{text-align:center;padding:28px;font-family:'Share Tech Mono',monospace;font-size:.75rem;color:var(--sub);}
+
+/* ── SETTINGS FORM ── */
+.sform{display:grid;grid-template-columns:1fr 1fr;gap:13px;}
+@media(max-width:480px){.sform{grid-template-columns:1fr;}}
+.fg{display:flex;flex-direction:column;gap:5px;}
+.fg.full{grid-column:1/-1;}
+.flbl{font-size:.62rem;color:var(--sub2);letter-spacing:2px;font-family:'Share Tech Mono',monospace;text-transform:uppercase;}
+.finp{background:#04080f;border:1px solid var(--b1);border-radius:8px;padding:9px 13px;color:var(--txt);font-family:'Share Tech Mono',monospace;font-size:.85rem;outline:none;transition:border-color .2s;width:100%;}
+.finp:focus{border-color:var(--acc);box-shadow:var(--glow);}
 .finp::placeholder{color:var(--sub);}
-.sec-div{height:1px;background:linear-gradient(90deg,transparent,var(--border2),transparent);margin:22px 0;}
-.show-row{display:flex;align-items:center;gap:8px;margin-top:6px;}
-.show-row input[type=checkbox]{width:14px;height:14px;cursor:pointer;accent-color:var(--accent2);}
-.show-row label{font-size:0.68rem;color:var(--sub2);font-family:'Share Tech Mono',monospace;cursor:pointer;}
-.smsg{text-align:center;min-height:18px;margin-top:10px;font-family:'Share Tech Mono',monospace;font-size:0.72rem;color:var(--accent2);}
-.info-note{font-size:0.7rem;color:var(--accent2);font-family:'Share Tech Mono',monospace;margin-bottom:14px;padding:8px 12px;background:rgba(0,212,255,0.05);border:1px solid rgba(0,212,255,0.2);border-radius:8px;}
-.warn-note{font-size:0.7rem;color:var(--warn);font-family:'Share Tech Mono',monospace;margin-bottom:14px;padding:8px 12px;background:rgba(255,179,0,0.06);border:1px solid rgba(255,179,0,0.2);border-radius:8px;}
-footer{text-align:center;padding:20px;font-family:'Share Tech Mono',monospace;font-size:0.68rem;color:var(--sub);border-top:1px solid var(--border);margin-top:20px;line-height:2.2;}
+.sec-div{height:1px;background:linear-gradient(90deg,transparent,var(--b2),transparent);margin:18px 0;}
+.save-msg{text-align:center;min-height:16px;margin-top:9px;font-family:'Share Tech Mono',monospace;font-size:.7rem;color:var(--grn);}
+
+footer{text-align:center;padding:18px;font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--sub);border-top:1px solid var(--b1);margin-top:18px;line-height:2.2;}
 </style>
 </head>
 <body>
 <div class="scanline"></div>
 <div class="page">
 
-<!-- HEADER -->
+<!-- ── HEADER ── -->
 <header>
-  <div class="logo"><div class="logo-icon">⚡</div>SMART <span>ENERGY</span> METER</div>
-  <div class="hbar">
-    <div class="hstatus">
-      <span class="dot" id="wDot"></span>
-      <span id="wTxt" style="color:var(--sub2)">Connecting...</span>
-      <span style="color:var(--border2);margin:0 6px">|</span>
-      <span id="lastUpd" style="color:var(--sub)">--:--:--</span>
-    </div>
+  <div class="logo">
+    <div class="logo-icon">⚡</div>
+    SMART <span>ENERGY</span> METER
+  </div>
+  <div class="hright">
+    <span><span class="dot" id="wDot"></span><span id="wTxt" style="color:var(--sub2)">Connecting...</span></span>
+    <span style="color:var(--b2);margin:0 4px">|</span>
+    <span id="lastUpd" style="color:var(--sub)">--:--:--</span>
     <div class="menu-wrap">
       <button class="menu-btn" onclick="toggleMenu()"><span></span><span></span><span></span></button>
-      <div class="dropdown" id="dropdown">
-        <div class="dd-item" onclick="goTo('sec-sensor')">📊 &nbsp;Live Readings</div>
-        <div class="dd-item" onclick="goTo('sec-billing')">💳 &nbsp;Billing</div>
-        <div class="dd-item" onclick="goTo('sec-home')">🏠 &nbsp;Home Automation</div>
-        <div class="dd-item" onclick="goTo('sec-history')">📅 &nbsp;Bill History</div>
-        <div class="dd-item" onclick="goTo('sec-settings')">⚙️ &nbsp;Settings</div>
+      <div class="dropdown" id="dd">
+        <div class="dd-item" onclick="go('sec-readings')">📊 &nbsp;Live Readings</div>
+        <div class="dd-item" onclick="go('sec-billing')">💳 &nbsp;Billing</div>
+        <div class="dd-item" onclick="go('sec-relay')">🔌 &nbsp;Relay Control</div>
+        <div class="dd-item" onclick="go('sec-history')">📅 &nbsp;Bill History</div>
+        <div class="dd-item" onclick="go('sec-settings')">⚙️ &nbsp;Settings</div>
       </div>
     </div>
   </div>
 </header>
 
-<!-- ALERT -->
-<div class="alert-banner" id="alertBox">⚠ ALERT: <span id="alertTxt"></span></div>
+<!-- ── ALERT ── -->
+<div class="alert-banner" id="alertBox">
+  ⚠ &nbsp;<span id="alertTxt"></span>
+</div>
 
-<!-- LIVE READINGS -->
-<div class="section" id="sec-sensor">
+<!-- ── LIVE READINGS ── -->
+<div class="section" id="sec-readings">
   <div class="stitle">📊 &nbsp;Live Sensor Readings</div>
   <div class="sgrid">
-    <div class="scard"><div class="cc"></div><div class="slabel">Voltage</div><div class="sval" id="v">--</div><div class="sunit">Volts (V)</div></div>
-    <div class="scard g"><div class="cc"></div><div class="slabel">Current</div><div class="sval" id="i">--</div><div class="sunit">Amperes (A)</div></div>
-    <div class="scard"><div class="cc"></div><div class="slabel">Active Power</div><div class="sval" id="pw">--</div><div class="sunit">Watts (W)</div></div>
-    <div class="scard g"><div class="cc"></div><div class="slabel">Energy</div><div class="sval" id="en">--</div><div class="sunit">kWh</div></div>
-    <div class="scard w"><div class="cc"></div><div class="slabel">Frequency</div><div class="sval" id="fr">--</div><div class="sunit">Hertz (Hz)</div></div>
-    <div class="scard w"><div class="cc"></div><div class="slabel">Power Factor</div><div class="sval" id="pf">--</div><div class="sunit">cos φ</div></div>
+    <div class="scard"   id="vc"><div class="cc"></div><div class="slbl">Voltage</div><div class="sval" id="v">--</div><div class="sunit">Volts (V)</div></div>
+    <div class="scard g" id="ic"><div class="cc"></div><div class="slbl">Current</div><div class="sval" id="i">--</div><div class="sunit">Amperes (A)</div></div>
+    <div class="scard"      ><div class="cc"></div><div class="slbl">Active Power</div><div class="sval" id="pw">--</div><div class="sunit">Watts (W)</div></div>
+    <div class="scard g"    ><div class="cc"></div><div class="slbl">Energy</div><div class="sval" id="en">--</div><div class="sunit">kWh</div></div>
+    <div class="scard w"    ><div class="cc"></div><div class="slbl">Frequency</div><div class="sval" id="fr">--</div><div class="sunit">Hertz (Hz)</div></div>
+    <div class="scard w"    ><div class="cc"></div><div class="slbl">Power Factor</div><div class="sval" id="pf">--</div><div class="sunit">cos φ</div></div>
   </div>
 </div>
 
 <div class="divider"></div>
 
-<!-- BILLING + HOME AUTO -->
-<div class="two" style="margin-bottom:28px;">
+<!-- ── BILLING + RELAY ── -->
+<div class="two" style="margin-bottom:26px;">
+
+  <!-- BILLING -->
   <div id="sec-billing">
     <div class="stitle">💳 &nbsp;Billing</div>
     <div class="panel">
       <div class="modetog">
         <button class="mbtn" id="preBtn" onclick="setMode('prepaid')">PREPAID</button>
-        <button class="mbtn post active" id="postBtn" onclick="setMode('postpaid')">POSTPAID</button>
+        <button class="mbtn p act" id="postBtn" onclick="setMode('postpaid')">POSTPAID</button>
       </div>
-      <div id="prepaidSec" style="display:none">
+
+      <!-- PREPAID -->
+      <div id="preSec" style="display:none">
         <div class="bignum">₹<span id="bal">0.00</span></div>
         <div class="bigsub">AVAILABLE BALANCE</div>
         <div class="barwrap"><div class="barfill" id="balBar" style="width:100%"></div></div>
-        <div class="brow"><span class="bl">Total Cost</span><span class="bv">₹<span id="cost1">0.00</span></span></div>
+        <div class="brow"><span class="bl">Total Cost</span><span class="bv">₹<span id="cost1">0.00000</span></span></div>
         <div class="brow"><span class="bl">Rate</span><span class="bv">₹<span id="rate1">6.50</span>/kWh</span></div>
-        <div class="brow"><span class="bl">Energy Used</span><span class="bv"><span id="en1">0.000</span> kWh</span></div>
+        <div class="brow"><span class="bl">Energy Used</span><span class="bv"><span id="en1">0.00000</span> kWh</span></div>
         <div class="rrow">
-          <input type="number" class="inp" id="rAmt" placeholder="Enter ₹ amount" min="1"/>
-          <button class="btn" onclick="doRecharge()">ADD</button>
+          <input type="number" class="inp" id="rAmt" placeholder="Recharge ₹ amount" min="1"/>
+          <button class="btn green" onclick="doRecharge()">ADD</button>
         </div>
-        <div class="smallmsg" id="rMsg"></div>
+        <div class="smsg" id="rMsg"></div>
       </div>
-      <div id="postpaidSec">
-        <div class="bignum blue">₹<span id="bill">0.00</span></div>
-        <div class="bigsub">TOTAL BILL THIS MONTH</div>
+
+      <!-- POSTPAID -->
+      <div id="postSec">
+        <div class="bignum b">₹<span id="bill">0.00000</span></div>
+        <div class="bigsub">TOTAL BILL</div>
         <div class="brow"><span class="bl">Rate</span><span class="bv">₹<span id="rate2">6.50</span>/kWh</span></div>
-        <div class="brow"><span class="bl">Energy Used</span><span class="bv"><span id="en2">0.000</span> kWh</span></div>
+        <div class="brow"><span class="bl">Energy Used</span><span class="bv"><span id="en2">0.00000</span> kWh</span></div>
         <div class="brow"><span class="bl">Current Power</span><span class="bv"><span id="pw2">0.0</span> W</span></div>
-        <div class="brow"><span class="bl">Main Supply</span><span class="bv" id="r1status" style="color:var(--accent2)">ON</span></div>
+        <div class="brow"><span class="bl">Main Supply</span><span class="bv" id="r1st" style="color:var(--grn)">ON</span></div>
       </div>
     </div>
   </div>
 
-  <div id="sec-home">
-    <div class="stitle">🏠 &nbsp;Home Automation</div>
+  <!-- RELAY CONTROL -->
+  <div id="sec-relay">
+    <div class="stitle">🔌 &nbsp;Relay Control</div>
     <div class="panel">
-      <div class="hgrid">
-        <div class="hcard" id="hc1">
-          <div class="hinfo"><div class="hicon">🔌</div><div><div class="hname">MAIN SUPPLY</div><div class="htype">Relay 1 — Auto protection</div></div></div>
-          <div class="badge auto" id="r1b">AUTO</div>
+      <div class="relay-grid">
+
+        <!-- Relay 1 — Auto only -->
+        <div class="relay-card auto-on" id="rc1">
+          <div class="rinfo">
+            <div class="ricon">🔌</div>
+            <div>
+              <div class="rname">MAIN SUPPLY</div>
+              <div class="rtype">Relay 1 — Auto protection</div>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;">
+            <span class="status-badge auto" id="r1badge">AUTO</span>
+            <span style="font-size:.62rem;color:var(--sub);font-family:'Share Tech Mono',monospace;" id="r1st2">ON</span>
+          </div>
         </div>
-        <div class="hcard" id="hc2">
-          <div class="hinfo"><div class="hicon">💡</div><div><div class="hname">LIGHT</div><div class="htype">Relay 2</div></div></div>
-          <div class="hright2"><div class="badge off" id="r2b">OFF</div><label class="tgl"><input type="checkbox" id="r2" onchange="setRelay(2)"><span class="tslider"></span></label></div>
+
+        <!-- Relay 2 — Light -->
+        <div class="relay-card" id="rc2">
+          <div class="rinfo">
+            <div class="ricon" id="icon2">💡</div>
+            <div>
+              <div class="rname">LIGHT</div>
+              <div class="rtype">Relay 2 — Manual control</div>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
+            <span class="status-badge off" id="r2badge">OFF</span>
+            <div class="btn-pair">
+              <button class="btn-on" id="r2on" onclick="setRelay(2,true)">ON</button>
+              <button class="btn-off active" id="r2off" onclick="setRelay(2,false)">OFF</button>
+            </div>
+          </div>
         </div>
-        <div class="hcard" id="hc3">
-          <div class="hinfo"><div class="hicon">🌀</div><div><div class="hname">FAN</div><div class="htype">Relay 3</div></div></div>
-          <div class="hright2"><div class="badge off" id="r3b">OFF</div><label class="tgl"><input type="checkbox" id="r3" onchange="setRelay(3)"><span class="tslider"></span></label></div>
+
+        <!-- Relay 3 — Fan -->
+        <div class="relay-card" id="rc3">
+          <div class="rinfo">
+            <div class="ricon" id="icon3">🌀</div>
+            <div>
+              <div class="rname">FAN</div>
+              <div class="rtype">Relay 3 — Manual control</div>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
+            <span class="status-badge off" id="r3badge">OFF</span>
+            <div class="btn-pair">
+              <button class="btn-on" id="r3on" onclick="setRelay(3,true)">ON</button>
+              <button class="btn-off active" id="r3off" onclick="setRelay(3,false)">OFF</button>
+            </div>
+          </div>
         </div>
-        <div class="hcard" id="hc4">
-          <div class="hinfo"><div class="hicon">💧</div><div><div class="hname">PUMP</div><div class="htype">Relay 4</div></div></div>
-          <div class="hright2"><div class="badge off" id="r4b">OFF</div><label class="tgl"><input type="checkbox" id="r4" onchange="setRelay(4)"><span class="tslider"></span></label></div>
+
+        <!-- Relay 4 — Pump -->
+        <div class="relay-card" id="rc4">
+          <div class="rinfo">
+            <div class="ricon" id="icon4">💧</div>
+            <div>
+              <div class="rname">PUMP</div>
+              <div class="rtype">Relay 4 — Manual control</div>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
+            <span class="status-badge off" id="r4badge">OFF</span>
+            <div class="btn-pair">
+              <button class="btn-on" id="r4on" onclick="setRelay(4,true)">ON</button>
+              <button class="btn-off active" id="r4off" onclick="setRelay(4,false)">OFF</button>
+            </div>
+          </div>
         </div>
+
       </div>
     </div>
   </div>
@@ -234,18 +465,18 @@ footer{text-align:center;padding:20px;font-family:'Share Tech Mono',monospace;fo
 
 <div class="divider"></div>
 
-<!-- BILL HISTORY -->
+<!-- ── BILL HISTORY ── -->
 <div class="section" id="sec-history">
   <div class="stitle">📅 &nbsp;Monthly Bill History</div>
   <div class="panel">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
-      <div style="font-size:0.78rem;color:var(--sub2);font-family:'Share Tech Mono',monospace;">Last 12 months — Auto saved every month</div>
-      <button class="btn sm blue" onclick="downloadAllCSV()">⬇ Download All (CSV)</button>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px;">
+      <span style="font-size:.76rem;color:var(--sub2);font-family:'Share Tech Mono',monospace;">Last 12 months — auto saved</span>
+      <button class="btn blue sm" onclick="dlAllCSV()">⬇ Download All CSV</button>
     </div>
     <div style="overflow-x:auto;">
       <table class="hist-table">
         <thead><tr><th>Month</th><th>Units (kWh)</th><th>Cost (₹)</th><th>Days</th><th>Download</th></tr></thead>
-        <tbody id="histBody"><tr><td colspan="5" class="no-data">Loading bill history...</td></tr></tbody>
+        <tbody id="histBody"><tr><td colspan="5" class="no-data">Loading history...</td></tr></tbody>
       </table>
     </div>
   </div>
@@ -253,229 +484,317 @@ footer{text-align:center;padding:20px;font-family:'Share Tech Mono',monospace;fo
 
 <div class="divider"></div>
 
-<!-- SETTINGS -->
+<!-- ── SETTINGS ── -->
 <div class="section" id="sec-settings">
   <div class="stitle">⚙️ &nbsp;Settings</div>
   <div class="panel">
-
-    <!-- Protection -->
     <div class="ptitle">🛡️ Protection Thresholds</div>
     <div class="sform">
-      <div class="fg"><label class="flbl">Over Voltage Limit (V)</label><input type="number" class="finp" id="sOV" placeholder="e.g. 250"/></div>
-      <div class="fg"><label class="flbl">Under Voltage Limit (V)</label><input type="number" class="finp" id="sUV" placeholder="e.g. 180"/></div>
-      <div class="fg"><label class="flbl">Over Current Limit (A)</label><input type="number" class="finp" id="sOC" placeholder="e.g. 10" step="0.1"/></div>
+      <div class="fg"><label class="flbl">Over Voltage (V)</label><input type="number" class="finp" id="sOV" placeholder="e.g. 260"/></div>
+      <div class="fg"><label class="flbl">Under Voltage (V)</label><input type="number" class="finp" id="sUV" placeholder="e.g. 180"/></div>
+      <div class="fg"><label class="flbl">Over Current (A)</label><input type="number" class="finp" id="sOC" placeholder="e.g. 10" step="0.1"/></div>
       <div class="fg"><label class="flbl">Low Balance Alert (₹)</label><input type="number" class="finp" id="sLB" placeholder="e.g. 20"/></div>
     </div>
 
     <div class="sec-div"></div>
 
-    <!-- Telegram -->
-    <div class="ptitle tg">✈️ Telegram Alerts</div>
-    <div class="info-note">
-      💡 Get instant alerts on Telegram — free forever!
-      Token and Chat ID are saved securely in Firebase.
-    </div>
+    <div class="ptitle g">💰 Billing Settings</div>
     <div class="sform">
-      <div class="fg full">
-        <label class="flbl">Telegram Bot Token</label>
-        <input type="password" class="finp" id="sTT" placeholder="Paste your bot token here"/>
-        <div class="show-row">
-          <input type="checkbox" id="showToken" onchange="toggleToken()"/>
-          <label for="showToken">Show Token</label>
-        </div>
-      </div>
-      <div class="fg full">
-        <label class="flbl">Telegram Chat ID</label>
-        <input type="text" class="finp" id="sTCI" placeholder="e.g. 1688951542"/>
-      </div>
+      <div class="fg"><label class="flbl">Rate per Unit (₹/kWh)</label><input type="number" class="finp" id="sRate" placeholder="e.g. 6.50" step="0.01"/></div>
+      <div class="fg"><label class="flbl">Initial Balance (₹ prepaid)</label><input type="number" class="finp" id="sInitBal" placeholder="e.g. 100"/></div>
     </div>
 
-    <!-- Test Telegram -->
-    <button class="btn tg full" onclick="testTelegram()">
-      ✈️ SEND TEST TELEGRAM MESSAGE
-    </button>
-    <div class="smallmsg" id="testMsg"></div>
-
-    <div class="sec-div"></div>
-
-    <!-- Save -->
-    <button class="btn full" onclick="saveSettings()">
-      💾 SAVE ALL SETTINGS TO FIREBASE
-    </button>
-    <div class="smsg" id="smsg"></div>
-
+    <button class="btn green full" onclick="saveSettings()">💾 SAVE SETTINGS TO FIREBASE</button>
+    <div class="save-msg" id="savemsg"></div>
   </div>
 </div>
 
 <footer>
-  SMART ENERGY METER G7 &nbsp;·&nbsp; FIREBASE REALTIME DB &nbsp;·&nbsp; TELEGRAM ALERTS &nbsp;·&nbsp; v6.0<br/>
+  SMART ENERGY METER G7 &nbsp;·&nbsp; FIREBASE REALTIME DB &nbsp;·&nbsp; v1.0<br/>
   Final Year Project &nbsp;·&nbsp; vikasshettyhn2023-oss
 </footer>
 </div>
 
 <script>
-const cfg={apiKey:"AIzaSyCYQ2R_dOHa2MgVYvIuoGzZzo7hnKrqMQ4",authDomain:"smart-energy-meter-g7.firebaseapp.com",databaseURL:"https://smart-energy-meter-g7-default-rtdb.firebaseio.com",projectId:"smart-energy-meter-g7",storageBucket:"smart-energy-meter-g7.firebasestorage.app",messagingSenderId:"1053683554755",appId:"1:1053683554755:web:cf24d65a9b2c187e3d4576"};
+// ── FIREBASE CONFIG ──────────────────────
+// Replace with your Firebase config
+const cfg = {
+  apiKey:        "AIzaSyCYQ2R_dOHa2MgVYvIuoGzZzo7hnKrqMQ4",
+  authDomain:    "smart-energy-meter-g7.firebaseapp.com",
+  databaseURL:   "https://smart-energy-meter-g7-default-rtdb.firebaseio.com",
+  projectId:     "smart-energy-meter-g7",
+  storageBucket: "smart-energy-meter-g7.firebasestorage.app",
+  messagingSenderId: "1053683554755",
+  appId:         "1:1053683554755:web:cf24d65a9b2c187e3d4576"
+};
 firebase.initializeApp(cfg);
-const db=firebase.database();
-let histData={};
+const db = firebase.database();
+let histData = {};
 
-function sv(id,val,dec=1){const el=document.getElementById(id);if(el)el.textContent=isNaN(val)||val===null?'--':parseFloat(val).toFixed(dec);}
-function goTo(id){document.getElementById(id).scrollIntoView({behavior:'smooth',block:'start'});closeMenu();}
-function toggleMenu(){document.getElementById('dropdown').classList.toggle('open');}
-function closeMenu(){document.getElementById('dropdown').classList.remove('open');}
-document.addEventListener('click',e=>{if(!document.querySelector('.menu-wrap').contains(e.target))closeMenu();});
-
-function setBadge(n,state){
-  const b=document.getElementById('r'+n+'b');
-  const card=document.getElementById('hc'+n);
-  if(!b)return;
-  if(n===1){b.textContent=state?'ON':'OFF';b.className='badge '+(state?'on':'off');if(card)card.className='hcard'+(state?' on':'');const rs=document.getElementById('r1status');if(rs){rs.textContent=state?'ON':'OFF';rs.style.color=state?'var(--accent2)':'var(--danger)';}return;}
-  b.textContent=state?'ON':'OFF';b.className='badge '+(state?'on':'off');if(card)card.className='hcard'+(state?' on':'');const t=document.getElementById('r'+n);if(t)t.checked=state;
+// ── HELPERS ──────────────────────────────
+function sv(id, val, dec=2) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = (isNaN(val)||val===null) ? '--' : parseFloat(val).toFixed(dec);
 }
-function setRelay(n){const s=document.getElementById('r'+n).checked;db.ref('/relay/relay'+n).set(s);setBadge(n,s);}
+function go(id) {
+  document.getElementById(id).scrollIntoView({behavior:'smooth',block:'start'});
+  closeMenu();
+}
+function toggleMenu() { document.getElementById('dd').classList.toggle('open'); }
+function closeMenu()  { document.getElementById('dd').classList.remove('open'); }
+document.addEventListener('click', e => {
+  if (!document.querySelector('.menu-wrap').contains(e.target)) closeMenu();
+});
 
-function setMode(mode){db.ref('/settings/billingMode').set(mode);updateModeUI(mode);}
-function updateModeUI(mode){
-  const pre=document.getElementById('prepaidSec'),post=document.getElementById('postpaidSec');
-  const preB=document.getElementById('preBtn'),posB=document.getElementById('postBtn');
-  if(mode==='prepaid'){pre.style.display='block';post.style.display='none';preB.className='mbtn active';posB.className='mbtn post';}
-  else{pre.style.display='none';post.style.display='block';posB.className='mbtn post active';preB.className='mbtn';}
+// ── RELAY CONTROL ─────────────────────────
+function setRelay(n, state) {
+  db.ref('/relay/r' + n).set(state);
+  updateRelayUI(n, state);
 }
 
-function doRecharge(){
-  const amt=parseFloat(document.getElementById('rAmt').value);
-  const msg=document.getElementById('rMsg');
-  if(!amt||amt<=0){msg.style.color='var(--danger)';msg.textContent='⚠ Enter valid amount!';return;}
+function updateRelayUI(n, state) {
+  if (n === 1) {
+    const card  = document.getElementById('rc1');
+    const badge = document.getElementById('r1badge');
+    const st1   = document.getElementById('r1st');
+    const st2   = document.getElementById('r1st2');
+    card.className  = 'relay-card ' + (state ? 'auto-on' : 'auto-off');
+    badge.textContent = 'AUTO';
+    badge.className   = 'status-badge auto';
+    if (st1) { st1.textContent = state ? 'ON' : 'OFF'; st1.style.color = state ? 'var(--grn)' : 'var(--red)'; }
+    if (st2) st2.textContent = state ? 'ON' : 'OFF';
+    return;
+  }
+
+  const card   = document.getElementById('rc' + n);
+  const badge  = document.getElementById('r' + n + 'badge');
+  const btnOn  = document.getElementById('r' + n + 'on');
+  const btnOff = document.getElementById('r' + n + 'off');
+
+  if (card)  card.className  = 'relay-card' + (state ? ' on' : '');
+  if (badge) { badge.textContent = state ? 'ON' : 'OFF'; badge.className = 'status-badge ' + (state ? 'on' : 'off'); }
+  if (btnOn)  btnOn.className  = state ? 'btn-on active'  : 'btn-on';
+  if (btnOff) btnOff.className = state ? 'btn-off' : 'btn-off active';
+}
+
+// ── BILLING MODE ─────────────────────────
+function setMode(mode) {
+  db.ref('/settings/billingMode').set(mode);
+  updateModeUI(mode);
+}
+function updateModeUI(mode) {
+  const isPre = mode === 'prepaid';
+  document.getElementById('preSec').style.display  = isPre ? 'block' : 'none';
+  document.getElementById('postSec').style.display = isPre ? 'none'  : 'block';
+  document.getElementById('preBtn').className  = 'mbtn' + (isPre ? ' act' : '');
+  document.getElementById('postBtn').className = 'mbtn p' + (isPre ? '' : ' act');
+}
+
+// ── RECHARGE ─────────────────────────────
+function doRecharge() {
+  const amt = parseFloat(document.getElementById('rAmt').value);
+  const msg = document.getElementById('rMsg');
+  if (!amt || amt <= 0) { msg.style.color='var(--red)'; msg.textContent='⚠ Enter valid amount!'; return; }
   db.ref('/billing/recharge').set(amt);
-  msg.style.color='var(--accent2)';msg.textContent='✓ ₹'+amt.toFixed(2)+' recharge sent!';
-  document.getElementById('rAmt').value='';
-  setTimeout(()=>msg.textContent='',4000);
+  msg.style.color = 'var(--grn)';
+  msg.textContent = '✓ ₹' + amt.toFixed(2) + ' recharge sent!';
+  document.getElementById('rAmt').value = '';
+  setTimeout(() => msg.textContent = '', 4000);
 }
 
-function toggleToken(){document.getElementById('sTT').type=document.getElementById('showToken').checked?'text':'password';}
+// ── SAVE SETTINGS ─────────────────────────
+function saveSettings() {
+  const msg  = document.getElementById('savemsg');
+  const ov   = parseFloat(document.getElementById('sOV').value);
+  const uv   = parseFloat(document.getElementById('sUV').value);
+  const oc   = parseFloat(document.getElementById('sOC').value);
+  const lb   = parseFloat(document.getElementById('sLB').value);
+  const rate = parseFloat(document.getElementById('sRate').value);
+  const ibal = parseFloat(document.getElementById('sInitBal').value);
 
-function testTelegram(){
-  const msg=document.getElementById('testMsg');
-  const token=document.getElementById('sTT').value.trim();
-  const chatId=document.getElementById('sTCI').value.trim();
-  if(!token||!chatId){msg.style.color='var(--danger)';msg.textContent='⚠ Enter Token and Chat ID first!';return;}
-  db.ref('/settings').update({telegramToken:token,telegramChatId:chatId});
-  db.ref('/settings/testTelegram').set(true);
-  msg.style.color='var(--accent2)';msg.textContent='✓ Test message triggered! Check Telegram!';
-  setTimeout(()=>msg.textContent='',6000);
+  if (!ov || !uv || !oc) {
+    msg.style.color = 'var(--red)';
+    msg.textContent = '⚠ Fill all threshold fields!';
+    return;
+  }
+  if (uv >= ov) {
+    msg.style.color = 'var(--red)';
+    msg.textContent = '⚠ Under voltage must be less than over voltage!';
+    return;
+  }
+
+  const updates = { overVoltage: ov, underVoltage: uv, overCurrent: oc };
+  if (lb)   updates.lowBalance  = lb;
+  if (rate) updates.ratePerUnit = rate;
+  if (ibal) updates.initBalance = ibal;
+
+  db.ref('/settings').update(updates);
+  msg.style.color = 'var(--grn)';
+  msg.textContent = '✓ Settings saved! ESP8266 applies in ~30 seconds.';
+  setTimeout(() => msg.textContent = '', 5000);
 }
 
-function saveSettings(){
-  const msg=document.getElementById('smsg');
-  const ov=parseFloat(document.getElementById('sOV').value);
-  const uv=parseFloat(document.getElementById('sUV').value);
-  const oc=parseFloat(document.getElementById('sOC').value);
-  const lb=parseFloat(document.getElementById('sLB').value);
-  const tt=document.getElementById('sTT').value.trim();
-  const tci=document.getElementById('sTCI').value.trim();
-  if(!ov||!uv||!oc){msg.style.color='var(--danger)';msg.textContent='⚠ Fill voltage and current fields!';return;}
-  if(uv>=ov){msg.style.color='var(--danger)';msg.textContent='⚠ Under voltage must be less than over voltage!';return;}
-  const u={overVoltage:ov,underVoltage:uv,overCurrent:oc};
-  if(lb) u.lowBalance=lb;
-  if(tt) u.telegramToken=tt;
-  if(tci) u.telegramChatId=tci;
-  db.ref('/settings').update(u);
-  msg.style.color='var(--accent2)';msg.textContent='✓ All settings saved! ESP8266 applies in ~30 seconds.';
-  setTimeout(()=>msg.textContent='',5000);
-}
-
-function loadSettingsForm(){
-  db.ref('/settings').once('value',s=>{
-    const d=s.val();if(!d)return;
-    if(d.overVoltage)   document.getElementById('sOV').value=d.overVoltage;
-    if(d.underVoltage)  document.getElementById('sUV').value=d.underVoltage;
-    if(d.overCurrent)   document.getElementById('sOC').value=d.overCurrent;
-    if(d.lowBalance)    document.getElementById('sLB').value=d.lowBalance;
-    if(d.telegramToken) document.getElementById('sTT').value=d.telegramToken;
-    if(d.telegramChatId)document.getElementById('sTCI').value=d.telegramChatId;
-    if(d.billingMode)   updateModeUI(d.billingMode);
+// ── LOAD SETTINGS FORM ────────────────────
+function loadSettingsForm() {
+  db.ref('/settings').once('value', s => {
+    const d = s.val(); if (!d) return;
+    if (d.overVoltage)  document.getElementById('sOV').value    = d.overVoltage;
+    if (d.underVoltage) document.getElementById('sUV').value    = d.underVoltage;
+    if (d.overCurrent)  document.getElementById('sOC').value    = d.overCurrent;
+    if (d.lowBalance)   document.getElementById('sLB').value    = d.lowBalance;
+    if (d.ratePerUnit)  document.getElementById('sRate').value  = d.ratePerUnit;
+    if (d.initBalance)  document.getElementById('sInitBal').value = d.initBalance;
+    if (d.billingMode)  updateModeUI(d.billingMode);
   });
 }
 
-function formatMonth(key){const[y,m]=key.split('-');return['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][parseInt(m)-1]+' '+y;}
-
-function loadHistory(){
-  db.ref('/history').on('value',s=>{
-    const d=s.val();const tbody=document.getElementById('histBody');
-    if(!d){tbody.innerHTML='<tr><td colspan="5" class="no-data">No bill history yet.</td></tr>';return;}
-    histData=d;
-    const months=Object.keys(d).sort().reverse().slice(0,12);
-    if(!months.length){tbody.innerHTML='<tr><td colspan="5" class="no-data">No history yet.</td></tr>';return;}
-    tbody.innerHTML='';
-    months.forEach(m=>{
-      const r=d[m];const tr=document.createElement('tr');
-      tr.innerHTML=`<td class="mcol">${formatMonth(m)}</td><td>${parseFloat(r.energy||0).toFixed(3)}</td><td class="ccol">₹${parseFloat(r.cost||0).toFixed(2)}</td><td>${r.days||'--'}</td><td><div class="dlcol"><button class="btn sm" onclick="dlCSV('${m}')">CSV</button><button class="btn sm blue" onclick="dlPDF('${m}')">PDF</button></div></td>`;
+// ── BILL HISTORY ─────────────────────────
+function fmtMonth(k) {
+  const [y,m] = k.split('-');
+  return ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][parseInt(m)-1]+' '+y;
+}
+function loadHistory() {
+  db.ref('/history').on('value', s => {
+    const d = s.val();
+    const tbody = document.getElementById('histBody');
+    if (!d) { tbody.innerHTML='<tr><td colspan="5" class="no-data">No history yet.</td></tr>'; return; }
+    histData = d;
+    const months = Object.keys(d).sort().reverse().slice(0,12);
+    if (!months.length) { tbody.innerHTML='<tr><td colspan="5" class="no-data">No history yet.</td></tr>'; return; }
+    tbody.innerHTML = '';
+    months.forEach(m => {
+      const r = d[m]; const tr = document.createElement('tr');
+      tr.innerHTML = `<td class="mcol">${fmtMonth(m)}</td>
+        <td>${parseFloat(r.energy||0).toFixed(5)}</td>
+        <td class="ccol">₹${parseFloat(r.cost||0).toFixed(5)}</td>
+        <td>${r.days||'--'}</td>
+        <td><div class="dlcol">
+          <button class="btn sm blue" onclick="dlCSV('${m}')">CSV</button>
+          <button class="btn sm green" onclick="dlPDF('${m}')">PDF</button>
+        </div></td>`;
       tbody.appendChild(tr);
     });
   });
 }
 
-function dlCSV(month){
-  const r=histData[month];if(!r){alert('No data!');return;}
-  const label=formatMonth(month);
-  let csv='Smart Energy Meter - Bill for '+label+'\n\nMonth,Energy (kWh),Cost (Rs.),Days\n';
-  csv+=label+','+parseFloat(r.energy||0).toFixed(3)+','+parseFloat(r.cost||0).toFixed(2)+','+(r.days||'--')+'\n';
-  triggerDL(csv,'text/csv','Bill_'+month+'.csv');
+function dlCSV(month) {
+  const r = histData[month]; if (!r) { alert('No data!'); return; }
+  const label = fmtMonth(month);
+  let csv = 'Smart Energy Meter - Bill for ' + label + '\n\n';
+  csv += 'Month,Energy (kWh),Cost (Rs.),Rate (Rs./kWh),Days\n';
+  csv += label+','+parseFloat(r.energy||0).toFixed(5)+','+parseFloat(r.cost||0).toFixed(5)+','+parseFloat(r.rate||6.5).toFixed(2)+','+(r.days||'--')+'\n';
+  triggerDL(csv, 'text/csv', 'Bill_'+month+'.csv');
 }
-
-function downloadAllCSV(){
-  const months=Object.keys(histData).sort().reverse().slice(0,12);
-  if(!months.length){alert('No history!');return;}
-  let csv='Smart Energy Meter - Complete Bill History\n\nMonth,Energy (kWh),Cost (Rs.),Days\n';
-  months.forEach(m=>{const r=histData[m];csv+=formatMonth(m)+','+parseFloat(r.energy||0).toFixed(3)+','+parseFloat(r.cost||0).toFixed(2)+','+(r.days||'--')+'\n';});
-  triggerDL(csv,'text/csv','SmartMeter_AllBills.csv');
-}
-
-function dlPDF(month){
-  const r=histData[month];if(!r){alert('No data!');return;}
-  const label=formatMonth(month);
-  const html=`<!DOCTYPE html><html><head><title>Bill ${label}</title><style>body{font-family:Arial,sans-serif;max-width:600px;margin:40px auto;}.logo{font-size:22px;font-weight:900;color:#005090;letter-spacing:2px;margin-bottom:4px;}.sub{color:#777;font-size:12px;margin-bottom:30px;}table{width:100%;border-collapse:collapse;}th{background:#005090;color:#fff;padding:10px;text-align:left;}td{padding:10px;border-bottom:1px solid #eee;}.total td{font-weight:bold;color:#005090;}.footer{margin-top:40px;font-size:11px;color:#aaa;text-align:center;}</style></head><body><div class="logo">⚡ SMART ENERGY METER</div><div class="sub">Monthly Bill Statement</div><h2>Bill for ${label}</h2><table><tr><th>Description</th><th>Details</th></tr><tr><td>Billing Period</td><td>${label} (${r.days||'--'} days)</td></tr><tr><td>Energy Consumed</td><td>${parseFloat(r.energy||0).toFixed(3)} kWh</td></tr><tr><td>Rate per Unit</td><td>Rs. ${parseFloat(r.rate||6.5).toFixed(2)}/kWh</td></tr><tr class="total"><td>Total Amount Due</td><td>Rs. ${parseFloat(r.cost||0).toFixed(2)}</td></tr></table><div class="footer">Smart Energy Meter Dashboard - Final Year Project</div></body></html>`;
-  const w=window.open('','_blank');w.document.write(html);w.document.close();setTimeout(()=>w.print(),600);
-}
-
-function triggerDL(content,type,filename){
-  const blob=new Blob([content],{type});const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');a.href=url;a.download=filename;a.click();URL.revokeObjectURL(url);
-}
-
-function listen(){
-  db.ref('/sensor').on('value',s=>{
-    const d=s.val();if(!d)return;
-    sv('v',d.voltage,1);sv('i',d.current,2);sv('pw',d.power,1);
-    sv('en',d.energy,3);sv('fr',d.frequency,1);sv('pf',d.pf,2);
-    sv('pw2',d.power,1);sv('en1',d.energy,3);sv('en2',d.energy,3);
-    document.getElementById('lastUpd').textContent=new Date().toLocaleTimeString();
-    document.getElementById('wDot').className='dot';
-    document.getElementById('wTxt').textContent='Online';
-    document.getElementById('wTxt').style.color='var(--accent2)';
+function dlAllCSV() {
+  const months = Object.keys(histData).sort().reverse().slice(0,12);
+  if (!months.length) { alert('No history!'); return; }
+  let csv = 'Smart Energy Meter - Complete Bill History\n\nMonth,Energy (kWh),Cost (Rs.),Rate (Rs./kWh),Days\n';
+  months.forEach(m => {
+    const r = histData[m];
+    csv += fmtMonth(m)+','+parseFloat(r.energy||0).toFixed(5)+','+parseFloat(r.cost||0).toFixed(5)+','+parseFloat(r.rate||6.5).toFixed(2)+','+(r.days||'--')+'\n';
   });
-  db.ref('/billing').on('value',s=>{
-    const d=s.val();if(!d)return;
-    const bal=parseFloat(d.balance||0),cost=parseFloat(d.totalCost||0),rate=parseFloat(d.costPerUnit||6.5);
-    sv('bal',bal,2);sv('cost1',cost,2);sv('bill',cost,2);sv('rate1',rate,2);sv('rate2',rate,2);
-    const pct=Math.min((bal/500)*100,100);
-    const bar=document.getElementById('balBar');
-    bar.style.width=pct+'%';bar.className='barfill'+(bal<20?' d':bal<50?' w':'');
-    if(d.mode)updateModeUI(d.mode);
+  triggerDL(csv, 'text/csv', 'SmartMeter_AllBills.csv');
+}
+function dlPDF(month) {
+  const r = histData[month]; if (!r) { alert('No data!'); return; }
+  const label = fmtMonth(month);
+  const html = `<!DOCTYPE html><html><head><title>Bill ${label}</title>
+  <style>body{font-family:Arial,sans-serif;max-width:600px;margin:40px auto;}
+  .logo{font-size:22px;font-weight:900;color:#005090;letter-spacing:2px;margin-bottom:4px;}
+  .sub{color:#777;font-size:12px;margin-bottom:30px;}h2{color:#005090;margin-bottom:16px;}
+  table{width:100%;border-collapse:collapse;}th{background:#005090;color:#fff;padding:10px;text-align:left;}
+  td{padding:10px;border-bottom:1px solid #eee;}.total td{font-weight:bold;color:#005090;font-size:15px;}
+  .footer{margin-top:40px;font-size:11px;color:#aaa;text-align:center;}</style></head><body>
+  <div class="logo">⚡ SMART ENERGY METER</div>
+  <div class="sub">Monthly Bill Statement — Smart Energy Meter G7</div>
+  <h2>Bill for ${label}</h2>
+  <table>
+    <tr><th>Description</th><th>Details</th></tr>
+    <tr><td>Billing Period</td><td>${label} (${r.days||'--'} days)</td></tr>
+    <tr><td>Energy Consumed</td><td>${parseFloat(r.energy||0).toFixed(5)} kWh</td></tr>
+    <tr><td>Rate per Unit</td><td>Rs. ${parseFloat(r.rate||6.5).toFixed(2)} / kWh</td></tr>
+    <tr class="total"><td>Total Amount Due</td><td>Rs. ${parseFloat(r.cost||0).toFixed(2)}</td></tr>
+  </table>
+  <div class="footer">Generated by Smart Energy Meter Dashboard — Final Year Project</div>
+  </body></html>`;
+  const w = window.open('','_blank'); w.document.write(html); w.document.close();
+  setTimeout(() => w.print(), 600);
+}
+function triggerDL(content, type, filename) {
+  const blob = new Blob([content], {type});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = filename; a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ── FIREBASE LISTENERS ────────────────────
+function listen() {
+
+  // Sensor
+  db.ref('/sensor').on('value', s => {
+    const d = s.val(); if (!d) return;
+    sv('v',  d.voltage,   1);
+    sv('i',  d.current,   3);
+    sv('pw', d.power,     1);
+    sv('en', d.energy,    5);
+    sv('fr', d.frequency, 1);
+    sv('pf', d.pf,        3);
+    sv('pw2',d.power,     1);
+    sv('en1',d.energy,    5);
+    sv('en2',d.energy,    5);
+    document.getElementById('lastUpd').textContent = new Date().toLocaleTimeString();
+    document.getElementById('wDot').className = 'dot';
+    document.getElementById('wTxt').textContent = 'Online';
+    document.getElementById('wTxt').style.color = 'var(--grn)';
   });
-  db.ref('/relay').on('value',s=>{
-    const d=s.val();if(!d)return;
-    setBadge(1,d.relay1);setBadge(2,d.relay2);setBadge(3,d.relay3);setBadge(4,d.relay4);
+
+  // Billing
+  db.ref('/billing').on('value', s => {
+    const d = s.val(); if (!d) return;
+    const bal  = parseFloat(d.balance   || 0);
+    const cost = parseFloat(d.totalCost || 0);
+    const rate = parseFloat(d.ratePerUnit || 6.5);
+    sv('bal',   bal,  2);
+    sv('cost1', cost, 5);
+    sv('bill',  cost, 5);
+    sv('rate1', rate, 2);
+    sv('rate2', rate, 2);
+    const pct = Math.min((bal / 500) * 100, 100);
+    const bar = document.getElementById('balBar');
+    bar.style.width = pct + '%';
+    bar.className   = 'barfill' + (bal < 20 ? ' d' : bal < 50 ? ' w' : '');
+    if (d.mode) updateModeUI(d.mode);
   });
-  db.ref('/alerts/message').on('value',s=>{
-    const m=s.val()||'';
-    document.getElementById('alertTxt').textContent=m;
-    document.getElementById('alertBox').className='alert-banner'+(m?' show':'');
+
+  // Relay
+  db.ref('/relay').on('value', s => {
+    const d = s.val(); if (!d) return;
+    updateRelayUI(1, d.r1 !== false);
+    updateRelayUI(2, d.r2 === true);
+    updateRelayUI(3, d.r3 === true);
+    updateRelayUI(4, d.r4 === true);
+  });
+
+  // Alert
+  db.ref('/alerts/message').on('value', s => {
+    const msg = s.val() || '';
+    const box = document.getElementById('alertBox');
+    document.getElementById('alertTxt').textContent = msg;
+    box.className = 'alert-banner' + (msg ? ' show' : '');
   });
 }
 
-loadSettingsForm();loadHistory();listen();
-window.addEventListener('offline',()=>{document.getElementById('wDot').className='dot off';document.getElementById('wTxt').textContent='Offline';document.getElementById('wTxt').style.color='var(--danger)';});
+// ── START ─────────────────────────────────
+loadSettingsForm();
+loadHistory();
+listen();
+
+window.addEventListener('offline', () => {
+  document.getElementById('wDot').className = 'dot off';
+  document.getElementById('wTxt').textContent = 'Offline';
+  document.getElementById('wTxt').style.color = 'var(--red)';
+});
 </script>
 </body>
 </html>
