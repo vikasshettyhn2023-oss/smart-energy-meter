@@ -8,23 +8,14 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <style>
-:root{
-  --bg:#04080f;--panel:#080f1c;--panel2:#0b1525;
-  --border:#0e3060;--border2:#153870;
-  --accent:#00d4ff;--accent2:#00ff9d;--warn:#ffb300;--danger:#ff4444;
-  --text:#c8e0f4;--sub:#3d6080;--sub2:#5a85a8;
-  --glow:0 0 24px #00d4ff33;--glow2:0 0 24px #00ff9d33;--gdanger:0 0 24px #ff444433;
-}
-*{margin:0;padding:0;box-sizing:border-box;}
-html{scroll-behavior:smooth;}
+:root{--bg:#04080f;--panel:#080f1c;--panel2:#0b1525;--border:#0e3060;--border2:#153870;--accent:#00d4ff;--accent2:#00ff9d;--warn:#ffb300;--danger:#ff4444;--text:#c8e0f4;--sub:#3d6080;--sub2:#5a85a8;--glow:0 0 24px #00d4ff33;--glow2:0 0 24px #00ff9d33;--gdanger:0 0 24px #ff444433;}
+*{margin:0;padding:0;box-sizing:border-box;}html{scroll-behavior:smooth;}
 body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;min-height:100vh;overflow-x:hidden;}
 body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,212,255,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,0.025) 1px,transparent 1px);background-size:50px 50px;pointer-events:none;z-index:0;}
 body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 20% 20%,rgba(0,80,120,0.15) 0%,transparent 60%),radial-gradient(ellipse at 80% 80%,rgba(0,40,80,0.15) 0%,transparent 60%);pointer-events:none;z-index:0;}
 .page{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:16px 16px 40px;}
 .scanline{position:fixed;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--accent),transparent);animation:scan 6s linear infinite;opacity:0.15;pointer-events:none;z-index:9999;}
 @keyframes scan{0%{top:-1%}100%{top:101%}}
-
-/* HEADER */
 header{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;background:linear-gradient(135deg,#080f1c,#04080f);border:1px solid var(--border);border-radius:14px;margin-bottom:20px;box-shadow:var(--glow),inset 0 1px 0 rgba(0,212,255,0.1);position:sticky;top:10px;z-index:100;backdrop-filter:blur(10px);}
 .logo{font-family:'Orbitron',monospace;font-size:1.05rem;font-weight:900;color:var(--accent);text-shadow:0 0 30px var(--accent);letter-spacing:3px;display:flex;align-items:center;gap:10px;}
 .logo-icon{width:30px;height:30px;border:2px solid var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;box-shadow:var(--glow);animation:lp 2s infinite;}
@@ -38,26 +29,19 @@ header{display:flex;align-items:center;justify-content:space-between;padding:14p
 .menu-wrap{position:relative;}
 .menu-btn{width:36px;height:36px;background:transparent;border:1px solid var(--border2);border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:4px;transition:all 0.2s;}
 .menu-btn:hover{border-color:var(--accent);box-shadow:var(--glow);}
-.menu-btn span{display:block;width:4px;height:4px;border-radius:50%;background:var(--text);transition:background 0.2s;}
-.menu-btn:hover span{background:var(--accent);}
-.dropdown{position:absolute;top:44px;right:0;background:#080f1c;border:1px solid var(--border2);border-radius:12px;padding:8px;min-width:200px;display:none;z-index:999;box-shadow:0 8px 32px rgba(0,0,0,0.6),var(--glow);}
+.menu-btn span{display:block;width:4px;height:4px;border-radius:50%;background:var(--text);}
+.dropdown{position:absolute;top:44px;right:0;background:#080f1c;border:1px solid var(--border2);border-radius:12px;padding:8px;min-width:210px;display:none;z-index:999;box-shadow:0 8px 32px rgba(0,0,0,0.6),var(--glow);}
 .dropdown.open{display:block;animation:ddo 0.2s ease;}
 @keyframes ddo{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
 .dd-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;cursor:pointer;font-family:'Orbitron',monospace;font-size:0.65rem;letter-spacing:1px;color:var(--sub2);transition:all 0.15s;}
 .dd-item:hover{background:rgba(0,212,255,0.08);color:var(--accent);}
-
-/* ALERT */
 .alert-banner{display:none;background:linear-gradient(135deg,#2a0000,#150000);border:1px solid var(--danger);border-radius:12px;padding:14px 20px;margin-bottom:20px;color:var(--danger);font-family:'Orbitron',monospace;font-size:0.8rem;text-align:center;letter-spacing:1px;box-shadow:var(--gdanger);animation:ab 1s infinite;}
 @keyframes ab{0%,100%{border-color:var(--danger)}50%{border-color:rgba(255,68,68,0.3)}}
 .alert-banner.show{display:block;}
-
-/* SECTION */
 .section{margin-bottom:28px;}
 .stitle{font-family:'Orbitron',monospace;font-size:0.66rem;color:var(--sub2);letter-spacing:4px;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:12px;}
 .stitle::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--border2),transparent);}
 .divider{height:1px;background:linear-gradient(90deg,transparent,var(--border2),transparent);margin:6px 0 22px;}
-
-/* SENSOR GRID */
 .sgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
 @media(max-width:580px){.sgrid{grid-template-columns:repeat(2,1fr);}}
 .scard{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 14px;position:relative;overflow:hidden;transition:transform 0.2s,box-shadow 0.2s;}
@@ -65,31 +49,20 @@ header{display:flex;align-items:center;justify-content:space-between;padding:14p
 .scard::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),transparent);}
 .scard.g::before{background:linear-gradient(90deg,var(--accent2),transparent);}
 .scard.w::before{background:linear-gradient(90deg,var(--warn),transparent);}
-.scard.al{border-color:var(--danger);box-shadow:var(--gdanger);}
-.scard.al::before{background:linear-gradient(90deg,var(--danger),transparent);}
 .cc{position:absolute;top:10px;right:10px;width:18px;height:18px;border-top:1px solid var(--border2);border-right:1px solid var(--border2);border-radius:0 4px 0 0;opacity:0.4;}
 .slabel{font-size:0.63rem;color:var(--sub2);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;font-family:'Share Tech Mono',monospace;}
 .sval{font-family:'Orbitron',monospace;font-size:1.55rem;font-weight:700;color:var(--accent);line-height:1;}
-.scard.g .sval{color:var(--accent2);}
-.scard.w .sval{color:var(--warn);}
-.scard.al .sval{color:var(--danger);}
+.scard.g .sval{color:var(--accent2);}.scard.w .sval{color:var(--warn);}
 .sunit{font-family:'Share Tech Mono',monospace;font-size:0.66rem;color:var(--sub);margin-top:5px;}
-
-/* TWO COL */
 .two{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
 @media(max-width:640px){.two{grid-template-columns:1fr;}}
-
-/* PANEL */
 .panel{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:20px;}
-.ptitle{font-family:'Orbitron',monospace;font-size:0.7rem;color:var(--accent);letter-spacing:2px;margin-bottom:18px;text-transform:uppercase;display:flex;align-items:center;gap:8px;}
-
-/* MODE TOGGLE */
+.ptitle{font-family:'Orbitron',monospace;font-size:0.7rem;color:var(--accent);letter-spacing:2px;margin-bottom:14px;text-transform:uppercase;display:flex;align-items:center;gap:8px;}
+.ptitle.g{color:var(--accent2);}
 .modetog{display:flex;gap:6px;background:#04080f;border:1px solid var(--border);border-radius:10px;padding:4px;margin-bottom:18px;}
 .mbtn{flex:1;padding:8px 4px;background:transparent;border:none;border-radius:7px;cursor:pointer;font-family:'Orbitron',monospace;font-size:0.63rem;color:var(--sub2);letter-spacing:1px;transition:all 0.25s;}
 .mbtn.active{background:var(--accent);color:#000;font-weight:700;box-shadow:var(--glow);}
 .mbtn.active.post{background:var(--accent2);box-shadow:var(--glow2);}
-
-/* BILLING */
 .bignum{font-family:'Orbitron',monospace;font-size:2.1rem;font-weight:900;color:var(--accent2);text-shadow:0 0 30px var(--accent2);margin-bottom:3px;}
 .bignum.blue{color:var(--accent);text-shadow:0 0 30px var(--accent);}
 .bigsub{font-size:0.66rem;color:var(--sub);font-family:'Share Tech Mono',monospace;letter-spacing:2px;margin-bottom:14px;}
@@ -98,29 +71,24 @@ header{display:flex;align-items:center;justify-content:space-between;padding:14p
 .barfill.w{background:linear-gradient(90deg,var(--warn),#a07000);box-shadow:0 0 12px var(--warn);}
 .barfill.d{background:linear-gradient(90deg,var(--danger),#a00);box-shadow:0 0 12px var(--danger);}
 .brow{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid rgba(14,48,96,0.5);font-size:0.83rem;}
-.brow:last-of-type{border-bottom:none;}
-.bl{color:var(--sub2);}
+.brow:last-of-type{border-bottom:none;}.bl{color:var(--sub2);}
 .bv{font-family:'Share Tech Mono',monospace;font-weight:600;color:var(--text);}
 .rrow{display:flex;gap:8px;margin-top:14px;}
-.inp{flex:1;background:#04080f;border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-family:'Share Tech Mono',monospace;font-size:0.88rem;outline:none;transition:border-color 0.2s,box-shadow 0.2s;}
+.inp{flex:1;background:#04080f;border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-family:'Share Tech Mono',monospace;font-size:0.88rem;outline:none;transition:border-color 0.2s;}
 .inp:focus{border-color:var(--accent2);box-shadow:var(--glow2);}
 .inp::placeholder{color:var(--sub);}
 .smallmsg{font-size:0.7rem;min-height:16px;margin-top:6px;font-family:'Share Tech Mono',monospace;color:var(--accent2);}
-
-/* BTN */
 .btn{background:linear-gradient(135deg,var(--accent2),#00a870);color:#000;border:none;border-radius:8px;padding:9px 16px;font-family:'Orbitron',monospace;font-size:0.63rem;font-weight:700;cursor:pointer;letter-spacing:1px;transition:transform 0.1s,box-shadow 0.2s;white-space:nowrap;}
-.btn:hover{transform:scale(1.04);box-shadow:var(--glow2);}
-.btn:active{transform:scale(0.97);}
+.btn:hover{transform:scale(1.04);box-shadow:var(--glow2);}.btn:active{transform:scale(0.97);}
 .btn.blue{background:linear-gradient(135deg,var(--accent),#0070a0);color:#000;}
 .btn.sm{padding:6px 11px;font-size:0.58rem;}
-
-/* HOME AUTO */
+.btn.full{width:100%;padding:12px;font-size:0.68rem;letter-spacing:2px;margin-top:10px;}
 .hgrid{display:flex;flex-direction:column;gap:10px;}
 .hcard{background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:13px 16px;display:flex;align-items:center;justify-content:space-between;transition:border-color 0.2s,box-shadow 0.2s;}
 .hcard.on{border-color:var(--accent2);box-shadow:0 0 12px rgba(0,255,157,0.1);}
 .hinfo{display:flex;align-items:center;gap:12px;}
 .hicon{width:34px;height:34px;border-radius:8px;background:#04080f;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:15px;transition:all 0.2s;}
-.hcard.on .hicon{border-color:var(--accent2);box-shadow:0 0 10px rgba(0,255,157,0.2);}
+.hcard.on .hicon{border-color:var(--accent2);}
 .hname{font-family:'Orbitron',monospace;font-size:0.72rem;letter-spacing:1px;color:var(--text);}
 .htype{font-size:0.64rem;color:var(--sub);margin-top:2px;}
 .hright2{display:flex;align-items:center;gap:10px;}
@@ -134,30 +102,27 @@ header{display:flex;align-items:center;justify-content:space-between;padding:14p
 .tslider::before{content:'';position:absolute;width:18px;height:18px;left:3px;top:3px;background:var(--sub);border-radius:50%;transition:0.3s;}
 input:checked+.tslider{background:rgba(0,255,157,0.15);border-color:var(--accent2);}
 input:checked+.tslider::before{transform:translateX(20px);background:var(--accent2);box-shadow:0 0 10px var(--accent2);}
-
-/* HISTORY TABLE */
 .hist-table{width:100%;border-collapse:collapse;}
 .hist-table th{font-family:'Orbitron',monospace;font-size:0.6rem;color:var(--sub2);letter-spacing:2px;text-transform:uppercase;padding:10px 12px;text-align:left;border-bottom:1px solid var(--border2);}
 .hist-table td{padding:11px 12px;font-size:0.8rem;border-bottom:1px solid rgba(14,48,96,0.4);font-family:'Share Tech Mono',monospace;color:var(--text);}
 .hist-table tr:hover td{background:rgba(0,212,255,0.03);}
 .hist-table tr:last-child td{border-bottom:none;}
-.mcol{color:var(--sub2);}
-.ccol{color:var(--accent2);font-weight:600;}
+.mcol{color:var(--sub2);}.ccol{color:var(--accent2);font-weight:600;}
 .dlcol{display:flex;gap:6px;}
 .no-data{text-align:center;padding:30px;font-family:'Share Tech Mono',monospace;font-size:0.78rem;color:var(--sub);}
-
-/* SETTINGS */
 .sform{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
 @media(max-width:500px){.sform{grid-template-columns:1fr;}}
-.fg{display:flex;flex-direction:column;gap:6px;}
-.fg.full{grid-column:1/-1;}
+.fg{display:flex;flex-direction:column;gap:6px;}.fg.full{grid-column:1/-1;}
 .flbl{font-size:0.65rem;color:var(--sub2);letter-spacing:2px;font-family:'Share Tech Mono',monospace;text-transform:uppercase;}
-.finp{background:#04080f;border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-family:'Share Tech Mono',monospace;font-size:0.88rem;outline:none;transition:border-color 0.2s,box-shadow 0.2s;width:100%;}
+.finp{background:#04080f;border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-family:'Share Tech Mono',monospace;font-size:0.88rem;outline:none;transition:border-color 0.2s;width:100%;}
 .finp:focus{border-color:var(--accent);box-shadow:var(--glow);}
 .finp::placeholder{color:var(--sub);}
-.savebtn{margin-top:16px;width:100%;padding:13px;font-size:0.7rem;letter-spacing:2px;}
+.sec-div{height:1px;background:linear-gradient(90deg,transparent,var(--border2),transparent);margin:22px 0;}
+.show-row{display:flex;align-items:center;gap:8px;margin-top:6px;}
+.show-row input[type=checkbox]{width:14px;height:14px;cursor:pointer;accent-color:var(--accent2);}
+.show-row label{font-size:0.68rem;color:var(--sub2);font-family:'Share Tech Mono',monospace;cursor:pointer;}
 .smsg{text-align:center;min-height:18px;margin-top:10px;font-family:'Share Tech Mono',monospace;font-size:0.72rem;color:var(--accent2);}
-
+.warn-note{font-size:0.7rem;color:var(--warn);font-family:'Share Tech Mono',monospace;margin-bottom:14px;padding:8px 12px;background:rgba(255,179,0,0.06);border:1px solid rgba(255,179,0,0.2);border-radius:8px;}
 footer{text-align:center;padding:20px;font-family:'Share Tech Mono',monospace;font-size:0.68rem;color:var(--sub);border-top:1px solid var(--border);margin-top:20px;line-height:2.2;}
 </style>
 </head>
@@ -165,12 +130,8 @@ footer{text-align:center;padding:20px;font-family:'Share Tech Mono',monospace;fo
 <div class="scanline"></div>
 <div class="page">
 
-<!-- HEADER -->
 <header>
-  <div class="logo">
-    <div class="logo-icon">⚡</div>
-    SMART <span>ENERGY</span> METER
-  </div>
+  <div class="logo"><div class="logo-icon">⚡</div>SMART <span>ENERGY</span> METER</div>
   <div class="hbar">
     <div class="hstatus">
       <span class="dot" id="wDot"></span>
@@ -179,29 +140,26 @@ footer{text-align:center;padding:20px;font-family:'Share Tech Mono',monospace;fo
       <span id="lastUpd" style="color:var(--sub)">--:--:--</span>
     </div>
     <div class="menu-wrap">
-      <button class="menu-btn" onclick="toggleMenu()">
-        <span></span><span></span><span></span>
-      </button>
+      <button class="menu-btn" onclick="toggleMenu()"><span></span><span></span><span></span></button>
       <div class="dropdown" id="dropdown">
-        <div class="dd-item" onclick="goTo('sec-sensor')">📊&nbsp; Live Readings</div>
-        <div class="dd-item" onclick="goTo('sec-billing')">💳&nbsp; Billing</div>
-        <div class="dd-item" onclick="goTo('sec-home')">🏠&nbsp; Home Automation</div>
-        <div class="dd-item" onclick="goTo('sec-history')">📅&nbsp; Bill History</div>
-        <div class="dd-item" onclick="goTo('sec-settings')">⚙️&nbsp; Settings</div>
+        <div class="dd-item" onclick="goTo('sec-sensor')">📊 &nbsp;Live Readings</div>
+        <div class="dd-item" onclick="goTo('sec-billing')">💳 &nbsp;Billing</div>
+        <div class="dd-item" onclick="goTo('sec-home')">🏠 &nbsp;Home Automation</div>
+        <div class="dd-item" onclick="goTo('sec-history')">📅 &nbsp;Bill History</div>
+        <div class="dd-item" onclick="goTo('sec-settings')">⚙️ &nbsp;Settings</div>
       </div>
     </div>
   </div>
 </header>
 
-<!-- ALERT -->
 <div class="alert-banner" id="alertBox">⚠ ALERT: <span id="alertTxt"></span></div>
 
-<!-- ══ LIVE READINGS ══ -->
+<!-- LIVE READINGS -->
 <div class="section" id="sec-sensor">
   <div class="stitle">📊 &nbsp;Live Sensor Readings</div>
   <div class="sgrid">
-    <div class="scard" id="vc"><div class="cc"></div><div class="slabel">Voltage</div><div class="sval" id="v">--</div><div class="sunit">Volts (V)</div></div>
-    <div class="scard g" id="ic"><div class="cc"></div><div class="slabel">Current</div><div class="sval" id="i">--</div><div class="sunit">Amperes (A)</div></div>
+    <div class="scard"><div class="cc"></div><div class="slabel">Voltage</div><div class="sval" id="v">--</div><div class="sunit">Volts (V)</div></div>
+    <div class="scard g"><div class="cc"></div><div class="slabel">Current</div><div class="sval" id="i">--</div><div class="sunit">Amperes (A)</div></div>
     <div class="scard"><div class="cc"></div><div class="slabel">Active Power</div><div class="sval" id="pw">--</div><div class="sunit">Watts (W)</div></div>
     <div class="scard g"><div class="cc"></div><div class="slabel">Energy</div><div class="sval" id="en">--</div><div class="sunit">kWh</div></div>
     <div class="scard w"><div class="cc"></div><div class="slabel">Frequency</div><div class="sval" id="fr">--</div><div class="sunit">Hertz (Hz)</div></div>
@@ -211,10 +169,8 @@ footer{text-align:center;padding:20px;font-family:'Share Tech Mono',monospace;fo
 
 <div class="divider"></div>
 
-<!-- ══ BILLING + HOME AUTO ══ -->
+<!-- BILLING + HOME AUTO -->
 <div class="two" style="margin-bottom:28px;">
-
-  <!-- BILLING -->
   <div id="sec-billing">
     <div class="stitle">💳 &nbsp;Billing</div>
     <div class="panel">
@@ -222,8 +178,6 @@ footer{text-align:center;padding:20px;font-family:'Share Tech Mono',monospace;fo
         <button class="mbtn" id="preBtn" onclick="setMode('prepaid')">PREPAID</button>
         <button class="mbtn post active" id="postBtn" onclick="setMode('postpaid')">POSTPAID</button>
       </div>
-
-      <!-- Prepaid -->
       <div id="prepaidSec" style="display:none">
         <div class="bignum">₹<span id="bal">0.00</span></div>
         <div class="bigsub">AVAILABLE BALANCE</div>
@@ -237,8 +191,6 @@ footer{text-align:center;padding:20px;font-family:'Share Tech Mono',monospace;fo
         </div>
         <div class="smallmsg" id="rMsg"></div>
       </div>
-
-      <!-- Postpaid -->
       <div id="postpaidSec">
         <div class="bignum blue">₹<span id="bill">0.00</span></div>
         <div class="bigsub">TOTAL BILL THIS MONTH</div>
@@ -250,7 +202,6 @@ footer{text-align:center;padding:20px;font-family:'Share Tech Mono',monospace;fo
     </div>
   </div>
 
-  <!-- HOME AUTO -->
   <div id="sec-home">
     <div class="stitle">🏠 &nbsp;Home Automation</div>
     <div class="panel">
@@ -278,7 +229,7 @@ footer{text-align:center;padding:20px;font-family:'Share Tech Mono',monospace;fo
 
 <div class="divider"></div>
 
-<!-- ══ BILL HISTORY ══ -->
+<!-- BILL HISTORY -->
 <div class="section" id="sec-history">
   <div class="stitle">📅 &nbsp;Monthly Bill History</div>
   <div class="panel">
@@ -297,19 +248,45 @@ footer{text-align:center;padding:20px;font-family:'Share Tech Mono',monospace;fo
 
 <div class="divider"></div>
 
-<!-- ══ SETTINGS ══ -->
+<!-- SETTINGS -->
 <div class="section" id="sec-settings">
   <div class="stitle">⚙️ &nbsp;Settings</div>
   <div class="panel">
+
+    <!-- Protection -->
+    <div class="ptitle">🛡️ Protection Thresholds</div>
     <div class="sform">
       <div class="fg"><label class="flbl">Over Voltage Limit (V)</label><input type="number" class="finp" id="sOV" placeholder="e.g. 250"/></div>
       <div class="fg"><label class="flbl">Under Voltage Limit (V)</label><input type="number" class="finp" id="sUV" placeholder="e.g. 180"/></div>
       <div class="fg"><label class="flbl">Over Current Limit (A)</label><input type="number" class="finp" id="sOC" placeholder="e.g. 10" step="0.1"/></div>
       <div class="fg"><label class="flbl">Low Balance Alert (₹)</label><input type="number" class="finp" id="sLB" placeholder="e.g. 20"/></div>
-      <div class="fg full"><label class="flbl">WhatsApp Number (with country code e.g. 919876543210)</label><input type="text" class="finp" id="sWN" placeholder="919876543210"/></div>
-      <div class="fg full"><label class="flbl">CallMeBot API Key (from WhatsApp bot)</label><input type="text" class="finp" id="sWK" placeholder="Paste your API key here"/></div>
     </div>
-    <button class="btn savebtn" onclick="saveSettings()">💾 SAVE SETTINGS TO FIREBASE</button>
+
+    <div class="sec-div"></div>
+
+    <!-- SMS Alerts -->
+    <div class="ptitle g">📱 SMS Alerts — Fast2SMS</div>
+    <div class="warn-note">⚠ Never share your API key with anyone. It is saved securely in Firebase only — not visible in code.</div>
+    <div class="sform">
+      <div class="fg full">
+        <label class="flbl">Phone Number (10 digits — no country code)</label>
+        <input type="text" class="finp" id="sPN" placeholder="e.g. 9876543210" maxlength="10"/>
+      </div>
+      <div class="fg full">
+        <label class="flbl">Fast2SMS API Key</label>
+        <input type="password" class="finp" id="sF2S" placeholder="Paste your Fast2SMS API key here"/>
+        <div class="show-row">
+          <input type="checkbox" id="showKey" onchange="toggleKey()"/>
+          <label for="showKey">Show API Key</label>
+        </div>
+      </div>
+    </div>
+    <button class="btn blue full" onclick="testSMS()">📱 SEND TEST SMS NOW</button>
+    <div class="smallmsg" id="testMsg"></div>
+
+    <div class="sec-div"></div>
+
+    <button class="btn full" onclick="saveSettings()">💾 SAVE ALL SETTINGS TO FIREBASE</button>
     <div class="smsg" id="smsg"></div>
   </div>
 </div>
@@ -318,7 +295,6 @@ footer{text-align:center;padding:20px;font-family:'Share Tech Mono',monospace;fo
   SMART ENERGY METER G7 &nbsp;·&nbsp; FIREBASE REALTIME DB &nbsp;·&nbsp; AUTO-REFRESH 5s &nbsp;·&nbsp; v3.0<br/>
   Final Year Project &nbsp;·&nbsp; vikasshettyhn2023-oss
 </footer>
-
 </div>
 
 <script>
@@ -337,35 +313,17 @@ function setBadge(n,state){
   const b=document.getElementById('r'+n+'b');
   const card=document.getElementById('hc'+n);
   if(!b)return;
-  if(n===1){
-    b.textContent=state?'ON':'OFF';b.className='badge '+(state?'on':'off');
-    if(card)card.className='hcard'+(state?' on':'');
-    const rs=document.getElementById('r1status');
-    if(rs){rs.textContent=state?'ON':'OFF';rs.style.color=state?'var(--accent2)':'var(--danger)';}
-    return;
-  }
-  b.textContent=state?'ON':'OFF';b.className='badge '+(state?'on':'off');
-  if(card)card.className='hcard'+(state?' on':'');
-  const t=document.getElementById('r'+n);if(t)t.checked=state;
+  if(n===1){b.textContent=state?'ON':'OFF';b.className='badge '+(state?'on':'off');if(card)card.className='hcard'+(state?' on':'');const rs=document.getElementById('r1status');if(rs){rs.textContent=state?'ON':'OFF';rs.style.color=state?'var(--accent2)':'var(--danger)';}return;}
+  b.textContent=state?'ON':'OFF';b.className='badge '+(state?'on':'off');if(card)card.className='hcard'+(state?' on':'');const t=document.getElementById('r'+n);if(t)t.checked=state;
 }
-
 function setRelay(n){const s=document.getElementById('r'+n).checked;db.ref('/relay/relay'+n).set(s);setBadge(n,s);}
 
-function setMode(mode){
-  db.ref('/settings/billingMode').set(mode);updateModeUI(mode);
-}
+function setMode(mode){db.ref('/settings/billingMode').set(mode);updateModeUI(mode);}
 function updateModeUI(mode){
-  const pre=document.getElementById('prepaidSec');
-  const post=document.getElementById('postpaidSec');
-  const preB=document.getElementById('preBtn');
-  const posB=document.getElementById('postBtn');
-  if(mode==='prepaid'){
-    pre.style.display='block';post.style.display='none';
-    preB.className='mbtn active';posB.className='mbtn post';
-  }else{
-    pre.style.display='none';post.style.display='block';
-    posB.className='mbtn post active';preB.className='mbtn';
-  }
+  const pre=document.getElementById('prepaidSec'),post=document.getElementById('postpaidSec');
+  const preB=document.getElementById('preBtn'),posB=document.getElementById('postBtn');
+  if(mode==='prepaid'){pre.style.display='block';post.style.display='none';preB.className='mbtn active';posB.className='mbtn post';}
+  else{pre.style.display='none';post.style.display='block';posB.className='mbtn post active';preB.className='mbtn';}
 }
 
 function doRecharge(){
@@ -378,24 +336,63 @@ function doRecharge(){
   setTimeout(()=>msg.textContent='',4000);
 }
 
-function formatMonth(key){
-  const[y,m]=key.split('-');
-  const n=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  return n[parseInt(m)-1]+' '+y;
+function toggleKey(){document.getElementById('sF2S').type=document.getElementById('showKey').checked?'text':'password';}
+
+function testSMS(){
+  const msg=document.getElementById('testMsg');
+  const key=document.getElementById('sF2S').value.trim();
+  const phone=document.getElementById('sPN').value.trim();
+  if(!key||!phone){msg.style.color='var(--danger)';msg.textContent='⚠ Enter phone number and API key first!';return;}
+  if(phone.length!==10){msg.style.color='var(--danger)';msg.textContent='⚠ Phone number must be 10 digits!';return;}
+  db.ref('/settings').update({phoneNumber:phone,fast2smsKey:key});
+  db.ref('/settings/testSMS').set(true);
+  msg.style.color='var(--accent2)';msg.textContent='✓ Test SMS triggered! Check your phone!';
+  setTimeout(()=>msg.textContent='',6000);
 }
+
+function saveSettings(){
+  const msg=document.getElementById('smsg');
+  const ov=parseFloat(document.getElementById('sOV').value);
+  const uv=parseFloat(document.getElementById('sUV').value);
+  const oc=parseFloat(document.getElementById('sOC').value);
+  const lb=parseFloat(document.getElementById('sLB').value);
+  const pn=document.getElementById('sPN').value.trim();
+  const f2s=document.getElementById('sF2S').value.trim();
+  if(!ov||!uv||!oc){msg.style.color='var(--danger)';msg.textContent='⚠ Fill voltage and current fields!';return;}
+  if(uv>=ov){msg.style.color='var(--danger)';msg.textContent='⚠ Under voltage must be less than over voltage!';return;}
+  if(pn&&pn.length!==10){msg.style.color='var(--danger)';msg.textContent='⚠ Phone number must be 10 digits!';return;}
+  const u={overVoltage:ov,underVoltage:uv,overCurrent:oc};
+  if(lb)u.lowBalance=lb;if(pn)u.phoneNumber=pn;if(f2s)u.fast2smsKey=f2s;
+  db.ref('/settings').update(u);
+  msg.style.color='var(--accent2)';msg.textContent='✓ All settings saved! ESP8266 applies in ~5 seconds.';
+  setTimeout(()=>msg.textContent='',5000);
+}
+
+function loadSettingsForm(){
+  db.ref('/settings').once('value',s=>{
+    const d=s.val();if(!d)return;
+    if(d.overVoltage)document.getElementById('sOV').value=d.overVoltage;
+    if(d.underVoltage)document.getElementById('sUV').value=d.underVoltage;
+    if(d.overCurrent)document.getElementById('sOC').value=d.overCurrent;
+    if(d.lowBalance)document.getElementById('sLB').value=d.lowBalance;
+    if(d.phoneNumber)document.getElementById('sPN').value=d.phoneNumber;
+    if(d.fast2smsKey)document.getElementById('sF2S').value=d.fast2smsKey;
+    if(d.billingMode)updateModeUI(d.billingMode);
+  });
+}
+
+function formatMonth(key){const[y,m]=key.split('-');return['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][parseInt(m)-1]+' '+y;}
 
 function loadHistory(){
   db.ref('/history').on('value',s=>{
-    const d=s.val();
-    const tbody=document.getElementById('histBody');
-    if(!d){tbody.innerHTML='<tr><td colspan="5" class="no-data">No bill history yet.<br/>History saves automatically each month.</td></tr>';return;}
+    const d=s.val();const tbody=document.getElementById('histBody');
+    if(!d){tbody.innerHTML='<tr><td colspan="5" class="no-data">No bill history yet.<br/>Saves automatically each month.</td></tr>';return;}
     histData=d;
     const months=Object.keys(d).sort().reverse().slice(0,12);
     if(!months.length){tbody.innerHTML='<tr><td colspan="5" class="no-data">No history yet.</td></tr>';return;}
     tbody.innerHTML='';
     months.forEach(m=>{
-      const r=d[m];
-      const tr=document.createElement('tr');
+      const r=d[m];const tr=document.createElement('tr');
       tr.innerHTML=`<td class="mcol">${formatMonth(m)}</td><td>${parseFloat(r.energy||0).toFixed(3)}</td><td class="ccol">₹${parseFloat(r.cost||0).toFixed(2)}</td><td>${r.days||'--'}</td><td><div class="dlcol"><button class="btn sm" onclick="dlCSV('${m}')">CSV</button><button class="btn sm blue" onclick="dlPDF('${m}')">PDF</button></div></td>`;
       tbody.appendChild(tr);
     });
@@ -405,7 +402,7 @@ function loadHistory(){
 function dlCSV(month){
   const r=histData[month];if(!r){alert('No data!');return;}
   const label=formatMonth(month);
-  let csv='Smart Energy Meter — Bill for '+label+'\n\nMonth,Energy (kWh),Cost (Rs.),Days\n';
+  let csv='Smart Energy Meter - Bill for '+label+'\n\nMonth,Energy (kWh),Cost (Rs.),Days\n';
   csv+=label+','+parseFloat(r.energy||0).toFixed(3)+','+parseFloat(r.cost||0).toFixed(2)+','+(r.days||'--')+'\n';
   triggerDL(csv,'text/csv','Bill_'+month+'.csv');
 }
@@ -413,7 +410,7 @@ function dlCSV(month){
 function downloadAllCSV(){
   const months=Object.keys(histData).sort().reverse().slice(0,12);
   if(!months.length){alert('No history data!');return;}
-  let csv='Smart Energy Meter — Bill History\n\nMonth,Energy (kWh),Cost (Rs.),Days\n';
+  let csv='Smart Energy Meter - Complete Bill History\n\nMonth,Energy (kWh),Cost (Rs.),Days\n';
   months.forEach(m=>{const r=histData[m];csv+=formatMonth(m)+','+parseFloat(r.energy||0).toFixed(3)+','+parseFloat(r.cost||0).toFixed(2)+','+(r.days||'--')+'\n';});
   triggerDL(csv,'text/csv','SmartMeter_AllBills.csv');
 }
@@ -425,45 +422,13 @@ function dlPDF(month){
   const cost=parseFloat(r.cost||0).toFixed(2);
   const days=r.days||'--';
   const rate=parseFloat(r.rate||6.5).toFixed(2);
-  const html=`<!DOCTYPE html><html><head><title>Bill ${label}</title><style>body{font-family:Arial,sans-serif;max-width:600px;margin:40px auto;color:#111;}h1{color:#00509e;}table{width:100%;border-collapse:collapse;margin-top:20px;}th{background:#00509e;color:#fff;padding:10px;text-align:left;font-size:13px;}td{padding:10px;border-bottom:1px solid #eee;font-size:13px;}.total{font-weight:bold;color:#00509e;}.logo{font-size:24px;font-weight:900;color:#00509e;letter-spacing:2px;}.footer{margin-top:40px;font-size:11px;color:#999;text-align:center;}.sub{color:#666;font-size:12px;margin-bottom:30px;}</style></head><body><div class="logo">⚡ SMART ENERGY METER</div><div class="sub">Monthly Bill Statement — Smart Energy Meter G7</div><h1>Bill for ${label}</h1><table><tr><th colspan="2">Bill Details</th></tr><tr><td>Billing Period</td><td>${label} (${days} days)</td></tr><tr><td>Energy Consumed</td><td>${energy} kWh</td></tr><tr><td>Rate per Unit</td><td>Rs. ${rate}/kWh</td></tr><tr><td class="total">Total Amount Due</td><td class="total">Rs. ${cost}</td></tr></table><div class="footer">Generated by Smart Energy Meter Dashboard — Final Year Project</div></body></html>`;
-  const w=window.open('','_blank');w.document.write(html);w.document.close();setTimeout(()=>w.print(),500);
+  const html=`<!DOCTYPE html><html><head><title>Bill ${label}</title><style>body{font-family:Arial,sans-serif;max-width:600px;margin:40px auto;color:#111;}.logo{font-size:22px;font-weight:900;color:#005090;letter-spacing:2px;margin-bottom:4px;}.sub{color:#777;font-size:12px;margin-bottom:30px;}h2{color:#005090;margin-bottom:16px;}table{width:100%;border-collapse:collapse;}th{background:#005090;color:#fff;padding:10px 14px;text-align:left;font-size:13px;}td{padding:10px 14px;border-bottom:1px solid #eee;font-size:13px;}.total td{font-weight:bold;color:#005090;font-size:15px;}.footer{margin-top:40px;font-size:11px;color:#aaa;text-align:center;border-top:1px solid #eee;padding-top:12px;}</style></head><body><div class="logo">⚡ SMART ENERGY METER</div><div class="sub">Smart Energy Meter G7 - Monthly Bill Statement</div><h2>Bill for ${label}</h2><table><tr><th>Description</th><th>Details</th></tr><tr><td>Billing Period</td><td>${label} (${days} days)</td></tr><tr><td>Energy Consumed</td><td>${energy} kWh</td></tr><tr><td>Rate per Unit</td><td>Rs. ${rate} / kWh</td></tr><tr class="total"><td>Total Amount Due</td><td>Rs. ${cost}</td></tr></table><div class="footer">Generated by Smart Energy Meter Dashboard - Final Year Project</div></body></html>`;
+  const w=window.open('','_blank');w.document.write(html);w.document.close();setTimeout(()=>w.print(),600);
 }
 
 function triggerDL(content,type,filename){
-  const blob=new Blob([content],{type});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');
-  a.href=url;a.download=filename;a.click();URL.revokeObjectURL(url);
-}
-
-function saveSettings(){
-  const msg=document.getElementById('smsg');
-  const ov=parseFloat(document.getElementById('sOV').value);
-  const uv=parseFloat(document.getElementById('sUV').value);
-  const oc=parseFloat(document.getElementById('sOC').value);
-  const lb=parseFloat(document.getElementById('sLB').value);
-  const wn=document.getElementById('sWN').value.trim();
-  const wk=document.getElementById('sWK').value.trim();
-  if(!ov||!uv||!oc){msg.style.color='var(--danger)';msg.textContent='⚠ Fill voltage and current fields!';return;}
-  if(uv>=ov){msg.style.color='var(--danger)';msg.textContent='⚠ Under voltage must be less than over voltage!';return;}
-  const u={overVoltage:ov,underVoltage:uv,overCurrent:oc};
-  if(lb)u.lowBalance=lb;if(wn)u.whatsappNumber=wn;if(wk)u.whatsappAPIKey=wk;
-  db.ref('/settings').update(u);
-  msg.style.color='var(--accent2)';msg.textContent='✓ Saved! ESP8266 applies settings in ~5 seconds.';
-  setTimeout(()=>msg.textContent='',5000);
-}
-
-function loadSettingsForm(){
-  db.ref('/settings').once('value',s=>{
-    const d=s.val();if(!d)return;
-    if(d.overVoltage)document.getElementById('sOV').value=d.overVoltage;
-    if(d.underVoltage)document.getElementById('sUV').value=d.underVoltage;
-    if(d.overCurrent)document.getElementById('sOC').value=d.overCurrent;
-    if(d.lowBalance)document.getElementById('sLB').value=d.lowBalance;
-    if(d.whatsappNumber)document.getElementById('sWN').value=d.whatsappNumber;
-    if(d.whatsappAPIKey)document.getElementById('sWK').value=d.whatsappAPIKey;
-    if(d.billingMode)updateModeUI(d.billingMode);
-  });
+  const blob=new Blob([content],{type});const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download=filename;a.click();URL.revokeObjectURL(url);
 }
 
 function listen(){
@@ -477,37 +442,27 @@ function listen(){
     document.getElementById('wTxt').textContent='Online';
     document.getElementById('wTxt').style.color='var(--accent2)';
   });
-
   db.ref('/billing').on('value',s=>{
     const d=s.val();if(!d)return;
-    const bal=parseFloat(d.balance||0);
-    const cost=parseFloat(d.totalCost||0);
-    const rate=parseFloat(d.costPerUnit||6.5);
-    sv('bal',bal,2);sv('cost1',cost,2);sv('bill',cost,2);
-    sv('rate1',rate,2);sv('rate2',rate,2);
+    const bal=parseFloat(d.balance||0),cost=parseFloat(d.totalCost||0),rate=parseFloat(d.costPerUnit||6.5);
+    sv('bal',bal,2);sv('cost1',cost,2);sv('bill',cost,2);sv('rate1',rate,2);sv('rate2',rate,2);
     const pct=Math.min((bal/500)*100,100);
     const bar=document.getElementById('balBar');
-    bar.style.width=pct+'%';
-    bar.className='barfill'+(bal<20?' d':bal<50?' w':'');
+    bar.style.width=pct+'%';bar.className='barfill'+(bal<20?' d':bal<50?' w':'');
     if(d.mode)updateModeUI(d.mode);
   });
-
   db.ref('/relay').on('value',s=>{
     const d=s.val();if(!d)return;
     setBadge(1,d.relay1);setBadge(2,d.relay2);setBadge(3,d.relay3);setBadge(4,d.relay4);
   });
-
   db.ref('/alerts/message').on('value',s=>{
     const m=s.val()||'';
-    const box=document.getElementById('alertBox');
     document.getElementById('alertTxt').textContent=m;
-    box.className='alert-banner'+(m?' show':'');
+    document.getElementById('alertBox').className='alert-banner'+(m?' show':'');
   });
 }
 
-loadSettingsForm();
-loadHistory();
-listen();
+loadSettingsForm();loadHistory();listen();
 window.addEventListener('offline',()=>{document.getElementById('wDot').className='dot off';document.getElementById('wTxt').textContent='Offline';document.getElementById('wTxt').style.color='var(--danger)';});
 </script>
 </body>
