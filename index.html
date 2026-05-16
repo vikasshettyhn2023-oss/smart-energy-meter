@@ -59,6 +59,7 @@ header{display:flex;align-items:center;justify-content:space-between;padding:14p
 .panel{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:20px;}
 .ptitle{font-family:'Orbitron',monospace;font-size:0.7rem;color:var(--accent);letter-spacing:2px;margin-bottom:14px;text-transform:uppercase;display:flex;align-items:center;gap:8px;}
 .ptitle.g{color:var(--accent2);}
+.ptitle.tg{color:#2AABEE;}
 .modetog{display:flex;gap:6px;background:#04080f;border:1px solid var(--border);border-radius:10px;padding:4px;margin-bottom:18px;}
 .mbtn{flex:1;padding:8px 4px;background:transparent;border:none;border-radius:7px;cursor:pointer;font-family:'Orbitron',monospace;font-size:0.63rem;color:var(--sub2);letter-spacing:1px;transition:all 0.25s;}
 .mbtn.active{background:var(--accent);color:#000;font-weight:700;box-shadow:var(--glow);}
@@ -81,6 +82,7 @@ header{display:flex;align-items:center;justify-content:space-between;padding:14p
 .btn{background:linear-gradient(135deg,var(--accent2),#00a870);color:#000;border:none;border-radius:8px;padding:9px 16px;font-family:'Orbitron',monospace;font-size:0.63rem;font-weight:700;cursor:pointer;letter-spacing:1px;transition:transform 0.1s,box-shadow 0.2s;white-space:nowrap;}
 .btn:hover{transform:scale(1.04);box-shadow:var(--glow2);}.btn:active{transform:scale(0.97);}
 .btn.blue{background:linear-gradient(135deg,var(--accent),#0070a0);color:#000;}
+.btn.tg{background:linear-gradient(135deg,#2AABEE,#1a8bc4);color:#fff;}
 .btn.sm{padding:6px 11px;font-size:0.58rem;}
 .btn.full{width:100%;padding:12px;font-size:0.68rem;letter-spacing:2px;margin-top:10px;}
 .hgrid{display:flex;flex-direction:column;gap:10px;}
@@ -122,6 +124,7 @@ input:checked+.tslider::before{transform:translateX(20px);background:var(--accen
 .show-row input[type=checkbox]{width:14px;height:14px;cursor:pointer;accent-color:var(--accent2);}
 .show-row label{font-size:0.68rem;color:var(--sub2);font-family:'Share Tech Mono',monospace;cursor:pointer;}
 .smsg{text-align:center;min-height:18px;margin-top:10px;font-family:'Share Tech Mono',monospace;font-size:0.72rem;color:var(--accent2);}
+.info-note{font-size:0.7rem;color:var(--accent2);font-family:'Share Tech Mono',monospace;margin-bottom:14px;padding:8px 12px;background:rgba(0,212,255,0.05);border:1px solid rgba(0,212,255,0.2);border-radius:8px;}
 .warn-note{font-size:0.7rem;color:var(--warn);font-family:'Share Tech Mono',monospace;margin-bottom:14px;padding:8px 12px;background:rgba(255,179,0,0.06);border:1px solid rgba(255,179,0,0.2);border-radius:8px;}
 footer{text-align:center;padding:20px;font-family:'Share Tech Mono',monospace;font-size:0.68rem;color:var(--sub);border-top:1px solid var(--border);margin-top:20px;line-height:2.2;}
 </style>
@@ -130,6 +133,7 @@ footer{text-align:center;padding:20px;font-family:'Share Tech Mono',monospace;fo
 <div class="scanline"></div>
 <div class="page">
 
+<!-- HEADER -->
 <header>
   <div class="logo"><div class="logo-icon">⚡</div>SMART <span>ENERGY</span> METER</div>
   <div class="hbar">
@@ -152,6 +156,7 @@ footer{text-align:center;padding:20px;font-family:'Share Tech Mono',monospace;fo
   </div>
 </header>
 
+<!-- ALERT -->
 <div class="alert-banner" id="alertBox">⚠ ALERT: <span id="alertTxt"></span></div>
 
 <!-- LIVE READINGS -->
@@ -264,35 +269,46 @@ footer{text-align:center;padding:20px;font-family:'Share Tech Mono',monospace;fo
 
     <div class="sec-div"></div>
 
-    <!-- SMS Alerts -->
-    <div class="ptitle g">📱 SMS Alerts — Fast2SMS</div>
-    <div class="warn-note">⚠ Never share your API key with anyone. It is saved securely in Firebase only — not visible in code.</div>
+    <!-- Telegram -->
+    <div class="ptitle tg">✈️ Telegram Alerts</div>
+    <div class="info-note">
+      💡 Get instant alerts on Telegram — free forever!
+      Token and Chat ID are saved securely in Firebase.
+    </div>
     <div class="sform">
       <div class="fg full">
-        <label class="flbl">Phone Number (10 digits — no country code)</label>
-        <input type="text" class="finp" id="sPN" placeholder="e.g. 9876543210" maxlength="10"/>
-      </div>
-      <div class="fg full">
-        <label class="flbl">Fast2SMS API Key</label>
-        <input type="password" class="finp" id="sF2S" placeholder="Paste your Fast2SMS API key here"/>
+        <label class="flbl">Telegram Bot Token</label>
+        <input type="password" class="finp" id="sTT" placeholder="Paste your bot token here"/>
         <div class="show-row">
-          <input type="checkbox" id="showKey" onchange="toggleKey()"/>
-          <label for="showKey">Show API Key</label>
+          <input type="checkbox" id="showToken" onchange="toggleToken()"/>
+          <label for="showToken">Show Token</label>
         </div>
       </div>
+      <div class="fg full">
+        <label class="flbl">Telegram Chat ID</label>
+        <input type="text" class="finp" id="sTCI" placeholder="e.g. 1688951542"/>
+      </div>
     </div>
-    <button class="btn blue full" onclick="testSMS()">📱 SEND TEST SMS NOW</button>
+
+    <!-- Test Telegram -->
+    <button class="btn tg full" onclick="testTelegram()">
+      ✈️ SEND TEST TELEGRAM MESSAGE
+    </button>
     <div class="smallmsg" id="testMsg"></div>
 
     <div class="sec-div"></div>
 
-    <button class="btn full" onclick="saveSettings()">💾 SAVE ALL SETTINGS TO FIREBASE</button>
+    <!-- Save -->
+    <button class="btn full" onclick="saveSettings()">
+      💾 SAVE ALL SETTINGS TO FIREBASE
+    </button>
     <div class="smsg" id="smsg"></div>
+
   </div>
 </div>
 
 <footer>
-  SMART ENERGY METER G7 &nbsp;·&nbsp; FIREBASE REALTIME DB &nbsp;·&nbsp; AUTO-REFRESH 5s &nbsp;·&nbsp; v3.0<br/>
+  SMART ENERGY METER G7 &nbsp;·&nbsp; FIREBASE REALTIME DB &nbsp;·&nbsp; TELEGRAM ALERTS &nbsp;·&nbsp; v6.0<br/>
   Final Year Project &nbsp;·&nbsp; vikasshettyhn2023-oss
 </footer>
 </div>
@@ -336,17 +352,16 @@ function doRecharge(){
   setTimeout(()=>msg.textContent='',4000);
 }
 
-function toggleKey(){document.getElementById('sF2S').type=document.getElementById('showKey').checked?'text':'password';}
+function toggleToken(){document.getElementById('sTT').type=document.getElementById('showToken').checked?'text':'password';}
 
-function testSMS(){
+function testTelegram(){
   const msg=document.getElementById('testMsg');
-  const key=document.getElementById('sF2S').value.trim();
-  const phone=document.getElementById('sPN').value.trim();
-  if(!key||!phone){msg.style.color='var(--danger)';msg.textContent='⚠ Enter phone number and API key first!';return;}
-  if(phone.length!==10){msg.style.color='var(--danger)';msg.textContent='⚠ Phone number must be 10 digits!';return;}
-  db.ref('/settings').update({phoneNumber:phone,fast2smsKey:key});
-  db.ref('/settings/testSMS').set(true);
-  msg.style.color='var(--accent2)';msg.textContent='✓ Test SMS triggered! Check your phone!';
+  const token=document.getElementById('sTT').value.trim();
+  const chatId=document.getElementById('sTCI').value.trim();
+  if(!token||!chatId){msg.style.color='var(--danger)';msg.textContent='⚠ Enter Token and Chat ID first!';return;}
+  db.ref('/settings').update({telegramToken:token,telegramChatId:chatId});
+  db.ref('/settings/testTelegram').set(true);
+  msg.style.color='var(--accent2)';msg.textContent='✓ Test message triggered! Check Telegram!';
   setTimeout(()=>msg.textContent='',6000);
 }
 
@@ -356,28 +371,29 @@ function saveSettings(){
   const uv=parseFloat(document.getElementById('sUV').value);
   const oc=parseFloat(document.getElementById('sOC').value);
   const lb=parseFloat(document.getElementById('sLB').value);
-  const pn=document.getElementById('sPN').value.trim();
-  const f2s=document.getElementById('sF2S').value.trim();
+  const tt=document.getElementById('sTT').value.trim();
+  const tci=document.getElementById('sTCI').value.trim();
   if(!ov||!uv||!oc){msg.style.color='var(--danger)';msg.textContent='⚠ Fill voltage and current fields!';return;}
   if(uv>=ov){msg.style.color='var(--danger)';msg.textContent='⚠ Under voltage must be less than over voltage!';return;}
-  if(pn&&pn.length!==10){msg.style.color='var(--danger)';msg.textContent='⚠ Phone number must be 10 digits!';return;}
   const u={overVoltage:ov,underVoltage:uv,overCurrent:oc};
-  if(lb)u.lowBalance=lb;if(pn)u.phoneNumber=pn;if(f2s)u.fast2smsKey=f2s;
+  if(lb) u.lowBalance=lb;
+  if(tt) u.telegramToken=tt;
+  if(tci) u.telegramChatId=tci;
   db.ref('/settings').update(u);
-  msg.style.color='var(--accent2)';msg.textContent='✓ All settings saved! ESP8266 applies in ~5 seconds.';
+  msg.style.color='var(--accent2)';msg.textContent='✓ All settings saved! ESP8266 applies in ~30 seconds.';
   setTimeout(()=>msg.textContent='',5000);
 }
 
 function loadSettingsForm(){
   db.ref('/settings').once('value',s=>{
     const d=s.val();if(!d)return;
-    if(d.overVoltage)document.getElementById('sOV').value=d.overVoltage;
-    if(d.underVoltage)document.getElementById('sUV').value=d.underVoltage;
-    if(d.overCurrent)document.getElementById('sOC').value=d.overCurrent;
-    if(d.lowBalance)document.getElementById('sLB').value=d.lowBalance;
-    if(d.phoneNumber)document.getElementById('sPN').value=d.phoneNumber;
-    if(d.fast2smsKey)document.getElementById('sF2S').value=d.fast2smsKey;
-    if(d.billingMode)updateModeUI(d.billingMode);
+    if(d.overVoltage)   document.getElementById('sOV').value=d.overVoltage;
+    if(d.underVoltage)  document.getElementById('sUV').value=d.underVoltage;
+    if(d.overCurrent)   document.getElementById('sOC').value=d.overCurrent;
+    if(d.lowBalance)    document.getElementById('sLB').value=d.lowBalance;
+    if(d.telegramToken) document.getElementById('sTT').value=d.telegramToken;
+    if(d.telegramChatId)document.getElementById('sTCI').value=d.telegramChatId;
+    if(d.billingMode)   updateModeUI(d.billingMode);
   });
 }
 
@@ -386,7 +402,7 @@ function formatMonth(key){const[y,m]=key.split('-');return['Jan','Feb','Mar','Ap
 function loadHistory(){
   db.ref('/history').on('value',s=>{
     const d=s.val();const tbody=document.getElementById('histBody');
-    if(!d){tbody.innerHTML='<tr><td colspan="5" class="no-data">No bill history yet.<br/>Saves automatically each month.</td></tr>';return;}
+    if(!d){tbody.innerHTML='<tr><td colspan="5" class="no-data">No bill history yet.</td></tr>';return;}
     histData=d;
     const months=Object.keys(d).sort().reverse().slice(0,12);
     if(!months.length){tbody.innerHTML='<tr><td colspan="5" class="no-data">No history yet.</td></tr>';return;}
@@ -409,7 +425,7 @@ function dlCSV(month){
 
 function downloadAllCSV(){
   const months=Object.keys(histData).sort().reverse().slice(0,12);
-  if(!months.length){alert('No history data!');return;}
+  if(!months.length){alert('No history!');return;}
   let csv='Smart Energy Meter - Complete Bill History\n\nMonth,Energy (kWh),Cost (Rs.),Days\n';
   months.forEach(m=>{const r=histData[m];csv+=formatMonth(m)+','+parseFloat(r.energy||0).toFixed(3)+','+parseFloat(r.cost||0).toFixed(2)+','+(r.days||'--')+'\n';});
   triggerDL(csv,'text/csv','SmartMeter_AllBills.csv');
@@ -418,11 +434,7 @@ function downloadAllCSV(){
 function dlPDF(month){
   const r=histData[month];if(!r){alert('No data!');return;}
   const label=formatMonth(month);
-  const energy=parseFloat(r.energy||0).toFixed(3);
-  const cost=parseFloat(r.cost||0).toFixed(2);
-  const days=r.days||'--';
-  const rate=parseFloat(r.rate||6.5).toFixed(2);
-  const html=`<!DOCTYPE html><html><head><title>Bill ${label}</title><style>body{font-family:Arial,sans-serif;max-width:600px;margin:40px auto;color:#111;}.logo{font-size:22px;font-weight:900;color:#005090;letter-spacing:2px;margin-bottom:4px;}.sub{color:#777;font-size:12px;margin-bottom:30px;}h2{color:#005090;margin-bottom:16px;}table{width:100%;border-collapse:collapse;}th{background:#005090;color:#fff;padding:10px 14px;text-align:left;font-size:13px;}td{padding:10px 14px;border-bottom:1px solid #eee;font-size:13px;}.total td{font-weight:bold;color:#005090;font-size:15px;}.footer{margin-top:40px;font-size:11px;color:#aaa;text-align:center;border-top:1px solid #eee;padding-top:12px;}</style></head><body><div class="logo">⚡ SMART ENERGY METER</div><div class="sub">Smart Energy Meter G7 - Monthly Bill Statement</div><h2>Bill for ${label}</h2><table><tr><th>Description</th><th>Details</th></tr><tr><td>Billing Period</td><td>${label} (${days} days)</td></tr><tr><td>Energy Consumed</td><td>${energy} kWh</td></tr><tr><td>Rate per Unit</td><td>Rs. ${rate} / kWh</td></tr><tr class="total"><td>Total Amount Due</td><td>Rs. ${cost}</td></tr></table><div class="footer">Generated by Smart Energy Meter Dashboard - Final Year Project</div></body></html>`;
+  const html=`<!DOCTYPE html><html><head><title>Bill ${label}</title><style>body{font-family:Arial,sans-serif;max-width:600px;margin:40px auto;}.logo{font-size:22px;font-weight:900;color:#005090;letter-spacing:2px;margin-bottom:4px;}.sub{color:#777;font-size:12px;margin-bottom:30px;}table{width:100%;border-collapse:collapse;}th{background:#005090;color:#fff;padding:10px;text-align:left;}td{padding:10px;border-bottom:1px solid #eee;}.total td{font-weight:bold;color:#005090;}.footer{margin-top:40px;font-size:11px;color:#aaa;text-align:center;}</style></head><body><div class="logo">⚡ SMART ENERGY METER</div><div class="sub">Monthly Bill Statement</div><h2>Bill for ${label}</h2><table><tr><th>Description</th><th>Details</th></tr><tr><td>Billing Period</td><td>${label} (${r.days||'--'} days)</td></tr><tr><td>Energy Consumed</td><td>${parseFloat(r.energy||0).toFixed(3)} kWh</td></tr><tr><td>Rate per Unit</td><td>Rs. ${parseFloat(r.rate||6.5).toFixed(2)}/kWh</td></tr><tr class="total"><td>Total Amount Due</td><td>Rs. ${parseFloat(r.cost||0).toFixed(2)}</td></tr></table><div class="footer">Smart Energy Meter Dashboard - Final Year Project</div></body></html>`;
   const w=window.open('','_blank');w.document.write(html);w.document.close();setTimeout(()=>w.print(),600);
 }
 
