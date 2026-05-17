@@ -2,430 +2,992 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Smart Energy Meter</title>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
+*{margin:0;padding:0;box-sizing:border-box}
 :root{
-  --bg:#04080f;--panel:#080f1c;--panel2:#0b1525;
-  --b1:#0e3060;--b2:#153870;
-  --acc:#00d4ff;--grn:#00ff9d;--warn:#ffb300;--red:#ff4444;
-  --txt:#c8e0f4;--sub:#3d6080;--sub2:#5a85a8;
-  --glow:0 0 20px #00d4ff30;--glow2:0 0 20px #00ff9d30;--glowr:0 0 20px #ff444430;
+  --bg:#080b0e;
+  --panel:#0d1117;
+  --card:#111820;
+  --border:#1a2332;
+  --border2:#243040;
+  --cyan:#00d4ff;
+  --green:#00e676;
+  --amber:#ffab00;
+  --red:#ff1744;
+  --purple:#d500f9;
+  --blue:#448aff;
+  --text:#cdd9e5;
+  --muted:#4d6070;
+  --muted2:#2a3848;
 }
-*{margin:0;padding:0;box-sizing:border-box;}
-html{scroll-behavior:smooth;}
-body{background:var(--bg);color:var(--txt);font-family:'Rajdhani',sans-serif;min-height:100vh;overflow-x:hidden;}
-body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,212,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,.025) 1px,transparent 1px);background-size:50px 50px;pointer-events:none;z-index:0;}
-.page{position:relative;z-index:1;max-width:1000px;margin:0 auto;padding:14px 14px 50px;}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Rajdhani',sans-serif;
+  font-size:15px;
+  min-height:100vh;
+}
+body::before{
+  content:'';position:fixed;inset:0;
+  background:
+    linear-gradient(rgba(0,212,255,0.02) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,212,255,0.02) 1px,transparent 1px);
+  background-size:48px 48px;
+  pointer-events:none;z-index:0;
+}
 
-/* SCANLINE */
-.scanline{position:fixed;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--acc),transparent);animation:scan 6s linear infinite;opacity:.1;pointer-events:none;z-index:9999;}
-@keyframes scan{0%{top:-1%}100%{top:101%}}
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
 
-/* HEADER */
-header{display:flex;align-items:center;justify-content:space-between;padding:13px 20px;background:linear-gradient(135deg,#080f1c,#050b14);border:1px solid var(--b1);border-radius:14px;margin-bottom:18px;box-shadow:var(--glow),inset 0 1px 0 rgba(0,212,255,.06);position:sticky;top:10px;z-index:100;backdrop-filter:blur(12px);}
-.logo{font-family:'Orbitron',monospace;font-size:1rem;font-weight:900;color:var(--acc);text-shadow:0 0 25px var(--acc);letter-spacing:3px;display:flex;align-items:center;gap:10px;}
-.logo-icon{width:28px;height:28px;border:2px solid var(--acc);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;animation:lp 2s ease-in-out infinite;}
-@keyframes lp{0%,100%{box-shadow:var(--glow)}50%{box-shadow:0 0 30px #00d4ff55}}
-.logo span{color:var(--grn);}
-.hright{display:flex;align-items:center;gap:10px;font-family:'Share Tech Mono',monospace;font-size:.68rem;}
-.dot{width:8px;height:8px;border-radius:50%;background:var(--grn);box-shadow:0 0 8px var(--grn);animation:dp 1.5s ease-in-out infinite;display:inline-block;}
-.dot.off{background:var(--red);box-shadow:0 0 8px var(--red);}
-@keyframes dp{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+/* ── HEADER ── */
+header{
+  position:sticky;top:0;z-index:100;
+  background:rgba(8,11,14,0.96);
+  backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border);
+  padding:0 28px;
+  height:60px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.brand{display:flex;align-items:center;gap:14px}
+.brand-icon{
+  width:38px;height:38px;
+  border:1.5px solid var(--cyan);
+  border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  position:relative;
+}
+.brand-icon::after{
+  content:'';width:12px;height:12px;
+  background:var(--cyan);border-radius:50%;
+  box-shadow:0 0 12px var(--cyan);
+  animation:hb 2s ease-in-out infinite;
+}
+@keyframes hb{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(0.7);opacity:0.5}}
+.brand-name{
+  font-size:18px;font-weight:700;letter-spacing:3px;
+  color:var(--cyan);text-transform:uppercase;
+}
+.brand-sub{font-family:'Share Tech Mono';font-size:10px;color:var(--muted);letter-spacing:1px}
+.header-right{display:flex;align-items:center;gap:16px}
+.pill{
+  display:flex;align-items:center;gap:6px;
+  font-family:'Share Tech Mono';font-size:11px;
+  padding:5px 12px;border-radius:20px;
+  border:1px solid var(--border2);color:var(--muted);
+  transition:all 0.3s;
+}
+.pill .dot{width:7px;height:7px;border-radius:50%;background:var(--muted)}
+.pill.live{color:var(--green);border-color:rgba(0,230,118,0.3)}
+.pill.live .dot{background:var(--green);box-shadow:0 0 8px var(--green);animation:hb 1.2s infinite}
+.pill.err{color:var(--red);border-color:rgba(255,23,68,0.3)}
+.pill.err .dot{background:var(--red)}
+#last-upd{font-family:'Share Tech Mono';font-size:10px;color:var(--muted)}
+.bill-btn{
+  display:flex;align-items:center;gap:6px;
+  font-family:'Rajdhani';font-size:13px;font-weight:600;
+  letter-spacing:1px;padding:7px 16px;border-radius:6px;
+  border:1px solid rgba(0,212,255,0.4);
+  background:rgba(0,212,255,0.07);
+  color:var(--cyan);cursor:pointer;transition:all 0.2s;
+}
+.bill-btn:hover{background:rgba(0,212,255,0.14);border-color:var(--cyan)}
 
-/* ALERT */
-.alert-box{display:none;background:linear-gradient(135deg,#2a0000,#150000);border:1px solid var(--red);border-radius:12px;padding:14px 20px;margin-bottom:18px;color:var(--red);font-family:'Orbitron',monospace;font-size:.82rem;text-align:center;letter-spacing:1px;box-shadow:var(--glowr);animation:ablink 1s ease infinite;}
-@keyframes ablink{0%,100%{border-color:var(--red)}50%{border-color:rgba(255,68,68,.15)}}
-.alert-box.show{display:block;}
+/* ── FAULT BANNER ── */
+#fault-banner{
+  display:none;
+  background:rgba(255,23,68,0.1);
+  border-bottom:1px solid rgba(255,23,68,0.4);
+  padding:10px 28px;
+  align-items:center;gap:10px;
+  font-family:'Share Tech Mono';font-size:12px;
+  color:var(--red);letter-spacing:1px;
+  position:relative;z-index:10;
+}
+.fault-ico{animation:blink 0.7s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
 
-/* SECTION */
-.stitle{font-family:'Orbitron',monospace;font-size:.63rem;color:var(--sub2);letter-spacing:4px;text-transform:uppercase;margin-bottom:13px;display:flex;align-items:center;gap:10px;}
-.stitle::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--b2),transparent);}
-.divider{height:1px;background:linear-gradient(90deg,transparent,var(--b2),transparent);margin:6px 0 20px;}
-.mb{margin-bottom:24px;}
+/* ── MAIN ── */
+main{position:relative;z-index:1;padding:24px 28px;max-width:1200px;margin:0 auto}
 
-/* SENSOR GRID */
-.sgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;}
-@media(max-width:700px){.sgrid{grid-template-columns:repeat(2,1fr);}}
-@media(max-width:400px){.sgrid{grid-template-columns:1fr;}}
+/* ── SECTION LABEL ── */
+.sec-label{
+  font-family:'Share Tech Mono';font-size:10px;letter-spacing:3px;
+  color:var(--muted);text-transform:uppercase;
+  display:flex;align-items:center;gap:10px;
+  margin-bottom:14px;
+}
+.sec-label::after{content:'';flex:1;height:1px;background:var(--border)}
 
-.scard{background:var(--panel);border:1px solid var(--b1);border-radius:12px;padding:16px 13px;position:relative;overflow:hidden;transition:transform .2s,box-shadow .2s;}
-.scard:hover{transform:translateY(-2px);box-shadow:var(--glow);}
-.scard::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--acc),transparent);}
-.scard.g::before{background:linear-gradient(90deg,var(--grn),transparent);}
-.scard.w::before{background:linear-gradient(90deg,var(--warn),transparent);}
-.scard.r::before{background:linear-gradient(90deg,var(--red),transparent);}
-.cc{position:absolute;top:8px;right:8px;width:14px;height:14px;border-top:1px solid var(--b2);border-right:1px solid var(--b2);border-radius:0 3px 0 0;opacity:.35;}
-.slbl{font-size:.6rem;color:var(--sub2);letter-spacing:2px;text-transform:uppercase;margin-bottom:7px;font-family:'Share Tech Mono',monospace;}
-.sval{font-family:'Orbitron',monospace;font-size:1.4rem;font-weight:700;color:var(--acc);line-height:1;}
-.scard.g .sval{color:var(--grn);}
-.scard.w .sval{color:var(--warn);}
-.scard.r .sval{color:var(--red);}
-.sunit{font-family:'Share Tech Mono',monospace;font-size:.6rem;color:var(--sub);margin-top:4px;}
+/* ── METRIC CARDS ── */
+.metrics{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:12px;margin-bottom:20px;
+}
+@media(max-width:700px){.metrics{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:420px){.metrics{grid-template-columns:1fr}}
 
-/* ENERGY + COST WIDE CARDS */
-.wide-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-top:11px;}
-@media(max-width:500px){.wide-grid{grid-template-columns:1fr;}}
-.wide-card{background:var(--panel);border:1px solid var(--b1);border-radius:12px;padding:18px 20px;position:relative;overflow:hidden;}
-.wide-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--grn),transparent);}
-.wide-card.cost::before{background:linear-gradient(90deg,var(--warn),transparent);}
-.wide-lbl{font-size:.6rem;color:var(--sub2);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;font-family:'Share Tech Mono',monospace;}
-.wide-val{font-family:'Orbitron',monospace;font-size:1.9rem;font-weight:900;color:var(--grn);text-shadow:0 0 20px var(--grn);}
-.wide-card.cost .wide-val{color:var(--warn);text-shadow:0 0 20px var(--warn);}
-.wide-unit{font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--sub);margin-top:5px;}
+.mcard{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:18px 20px 16px;
+  position:relative;overflow:hidden;
+  transition:border-color 0.3s,transform 0.2s;
+  cursor:default;
+}
+.mcard::before{
+  content:'';position:absolute;top:0;left:0;right:0;
+  height:2px;background:var(--cc,var(--cyan));
+  box-shadow:0 0 14px var(--cc,var(--cyan));
+}
+.mcard:hover{border-color:var(--cc,var(--cyan));transform:translateY(-2px)}
+.mcard-label{
+  font-family:'Share Tech Mono';font-size:9px;
+  letter-spacing:2.5px;color:var(--muted);
+  text-transform:uppercase;margin-bottom:10px;
+}
+.mcard-val{
+  font-family:'Share Tech Mono';
+  font-size:26px;line-height:1;
+  color:var(--cc,var(--cyan));
+  text-shadow:0 0 20px var(--cc,var(--cyan));
+  margin-bottom:4px;
+  transition:color 0.3s;
+  word-break:break-all;
+}
+.mcard-unit{font-family:'Share Tech Mono';font-size:11px;color:var(--muted)}
+.mcard-icon{position:absolute;right:16px;top:18px;font-size:22px;opacity:0.12}
 
-/* RELAY PANEL */
-.relay-panel{background:var(--panel);border:1px solid var(--b1);border-radius:14px;padding:20px;}
-.relay-status{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
-.relay-info{display:flex;align-items:center;gap:14px;}
-.relay-icon{width:44px;height:44px;border-radius:10px;background:#04080f;border:1px solid var(--b1);display:flex;align-items:center;justify-content:center;font-size:20px;transition:all .3s;}
-.relay-icon.on{border-color:var(--grn);box-shadow:0 0 12px rgba(0,255,157,.2);}
-.relay-icon.off{border-color:var(--red);}
-.relay-title{font-family:'Orbitron',monospace;font-size:.8rem;letter-spacing:1px;color:var(--txt);}
-.relay-sub{font-size:.65rem;color:var(--sub);margin-top:3px;}
-.relay-badge{font-family:'Orbitron',monospace;font-size:.65rem;padding:4px 12px;border-radius:5px;letter-spacing:1px;}
-.relay-badge.on{background:rgba(0,255,157,.1);color:var(--grn);border:1px solid rgba(0,255,157,.4);}
-.relay-badge.off{background:rgba(255,68,68,.1);color:var(--red);border:1px solid rgba(255,68,68,.4);}
-.relay-badge.auto{background:rgba(255,179,0,.1);color:var(--warn);border:1px solid rgba(255,179,0,.4);}
+/* cost row inside energy card */
+.cost-row{
+  margin-top:8px;padding-top:8px;
+  border-top:1px solid var(--border);
+  font-family:'Share Tech Mono';font-size:11px;
+  color:var(--muted);
+}
+.cost-val{color:var(--green);font-size:13px}
 
-/* ON/OFF BUTTONS */
-.btn-row{display:flex;gap:10px;}
-.btn-on{flex:1;background:linear-gradient(135deg,var(--grn),#00a870);color:#000;border:none;border-radius:9px;padding:12px;font-family:'Orbitron',monospace;font-size:.68rem;font-weight:700;cursor:pointer;letter-spacing:1px;transition:all .15s;opacity:.5;}
-.btn-off{flex:1;background:linear-gradient(135deg,var(--red),#a00);color:#fff;border:none;border-radius:9px;padding:12px;font-family:'Orbitron',monospace;font-size:.68rem;font-weight:700;cursor:pointer;letter-spacing:1px;transition:all .15s;opacity:.5;}
-.btn-on.active{opacity:1;box-shadow:var(--glow2);transform:scale(1.02);}
-.btn-off.active{opacity:1;box-shadow:var(--glowr);transform:scale(1.02);}
-.btn-on:hover{opacity:.85;transform:scale(1.03);}
-.btn-off:hover{opacity:.85;transform:scale(1.03);}
+@keyframes flash{0%{opacity:1}40%{opacity:0.3}100%{opacity:1}}
+.updated{animation:flash 0.4s ease}
 
-.auto-note{margin-top:12px;padding:10px 14px;background:rgba(255,179,0,.06);border:1px solid rgba(255,179,0,.2);border-radius:8px;font-family:'Share Tech Mono',monospace;font-size:.68rem;color:var(--warn);}
-.auto-note.hidden{display:none;}
+/* ── BOTTOM ROW ── */
+.bottom{display:grid;grid-template-columns:280px 1fr;gap:16px;margin-bottom:20px}
+@media(max-width:700px){.bottom{grid-template-columns:1fr}}
 
-/* SETTINGS */
-.settings-panel{background:var(--panel);border:1px solid var(--b1);border-radius:14px;padding:20px;}
-.sform{display:grid;grid-template-columns:1fr 1fr;gap:13px;}
-@media(max-width:480px){.sform{grid-template-columns:1fr;}}
-.fg{display:flex;flex-direction:column;gap:5px;}
-.flbl{font-size:.62rem;color:var(--sub2);letter-spacing:2px;font-family:'Share Tech Mono',monospace;text-transform:uppercase;}
-.finp{background:#04080f;border:1px solid var(--b1);border-radius:8px;padding:10px 13px;color:var(--txt);font-family:'Share Tech Mono',monospace;font-size:.88rem;outline:none;transition:border-color .2s;width:100%;}
-.finp:focus{border-color:var(--acc);box-shadow:var(--glow);}
-.finp::placeholder{color:var(--sub);}
-.save-btn{width:100%;padding:12px;margin-top:16px;background:linear-gradient(135deg,var(--grn),#00a870);color:#000;border:none;border-radius:9px;font-family:'Orbitron',monospace;font-size:.68rem;font-weight:700;cursor:pointer;letter-spacing:2px;transition:all .2s;}
-.save-btn:hover{transform:scale(1.02);box-shadow:var(--glow2);}
-.save-msg{text-align:center;min-height:16px;margin-top:8px;font-family:'Share Tech Mono',monospace;font-size:.7rem;color:var(--grn);}
+/* relay card */
+.relay-card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:10px;padding:20px;
+  display:flex;flex-direction:column;align-items:center;gap:14px;
+}
+.relay-title{
+  width:100%;display:flex;align-items:center;justify-content:space-between;
+  font-size:15px;font-weight:700;letter-spacing:1px;
+}
+.rbadge{
+  font-family:'Share Tech Mono';font-size:10px;
+  padding:3px 10px;border-radius:20px;letter-spacing:1px;
+  border:1px solid;
+}
+.rbadge.on{color:var(--green);border-color:rgba(0,230,118,0.4);background:rgba(0,230,118,0.08)}
+.rbadge.off{color:var(--red);border-color:rgba(255,23,68,0.4);background:rgba(255,23,68,0.08)}
 
-footer{text-align:center;padding:18px;font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--sub);border-top:1px solid var(--b1);margin-top:20px;line-height:2.2;}
+.rbtn{
+  width:88px;height:88px;border-radius:50%;
+  border:2px solid var(--border2);
+  background:transparent;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:all 0.3s;font-size:34px;
+}
+.rbtn.on{
+  border-color:var(--green);
+  box-shadow:0 0 24px rgba(0,230,118,0.3),inset 0 0 24px rgba(0,230,118,0.05);
+  color:var(--green);text-shadow:0 0 16px var(--green);
+}
+.rbtn.off{
+  border-color:var(--red);
+  box-shadow:0 0 24px rgba(255,23,68,0.3),inset 0 0 24px rgba(255,23,68,0.05);
+  color:var(--red);text-shadow:0 0 16px var(--red);
+}
+.rbtn:hover{transform:scale(1.06)}
+.rbtn:active{transform:scale(0.96)}
+.rlabel{font-family:'Share Tech Mono';font-size:11px;color:var(--muted);letter-spacing:1px}
+.fault-box{
+  width:100%;padding:8px 12px;border-radius:6px;
+  background:rgba(255,23,68,0.08);border:1px solid rgba(255,23,68,0.3);
+  font-family:'Share Tech Mono';font-size:11px;color:var(--red);
+  text-align:center;letter-spacing:1px;display:none;
+}
+
+/* chart card */
+.chart-card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:10px;padding:20px;
+}
+.chart-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.chart-title{font-size:15px;font-weight:700;letter-spacing:1px}
+.legend{display:flex;gap:14px}
+.li{display:flex;align-items:center;gap:5px;font-family:'Share Tech Mono';font-size:10px;color:var(--muted)}
+.ld{width:8px;height:8px;border-radius:50%}
+
+/* ── THRESHOLDS ROW ── */
+.thresh-row{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:12px;
+  margin-bottom:20px;
+}
+@media(max-width:600px){.thresh-row{grid-template-columns:1fr}}
+.tcard{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:10px;padding:14px 18px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.tcard-left{font-family:'Share Tech Mono';font-size:10px;letter-spacing:2px;color:var(--muted);text-transform:uppercase}
+.tcard-val{font-family:'Share Tech Mono';font-size:18px;font-weight:bold}
+.tcard-val.ov{color:var(--red)}
+.tcard-val.uv{color:var(--blue)}
+.tcard-val.oc{color:var(--amber)}
+.tcard-note{font-family:'Share Tech Mono';font-size:9px;color:var(--muted);margin-top:2px}
+
+/* ══════════════════════════════════
+   BILL MODAL
+══════════════════════════════════ */
+.modal-overlay{
+  display:none;position:fixed;inset:0;
+  background:rgba(0,0,0,0.85);
+  z-index:500;align-items:center;justify-content:center;
+  backdrop-filter:blur(4px);
+}
+.modal-overlay.open{display:flex}
+.modal{
+  background:var(--panel);
+  border:1px solid var(--border2);
+  border-radius:14px;
+  padding:0;
+  width:min(560px,96vw);
+  max-height:90vh;overflow-y:auto;
+  box-shadow:0 0 60px rgba(0,212,255,0.08);
+}
+.modal-head{
+  padding:20px 24px;
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.modal-head h2{font-size:17px;font-weight:700;letter-spacing:1px;color:var(--cyan)}
+.close-btn{
+  width:32px;height:32px;border-radius:6px;
+  background:transparent;border:1px solid var(--border2);
+  color:var(--muted);cursor:pointer;font-size:18px;
+  display:flex;align-items:center;justify-content:center;
+  transition:all 0.2s;
+}
+.close-btn:hover{background:var(--border2);color:var(--text)}
+
+.modal-body{padding:24px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+@media(max-width:450px){.form-row{grid-template-columns:1fr}}
+.form-group{display:flex;flex-direction:column;gap:6px}
+.form-group label{font-family:'Share Tech Mono';font-size:10px;letter-spacing:2px;color:var(--muted);text-transform:uppercase}
+.form-group input,.form-group select{
+  background:var(--card);border:1px solid var(--border2);
+  border-radius:6px;padding:9px 12px;
+  color:var(--text);font-family:'Share Tech Mono';font-size:13px;
+  outline:none;transition:border-color 0.2s;width:100%;
+}
+.form-group input:focus,.form-group select:focus{border-color:var(--cyan)}
+.form-group select option{background:var(--card)}
+
+/* bill preview */
+.bill-preview{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:10px;padding:20px;margin-top:20px;
+}
+.bill-preview h3{
+  font-family:'Share Tech Mono';font-size:11px;letter-spacing:2px;
+  color:var(--muted);text-transform:uppercase;margin-bottom:16px;
+}
+.bill-line{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:7px 0;border-bottom:1px solid var(--border);
+  font-size:14px;
+}
+.bill-line:last-child{border-bottom:none}
+.bill-line span:first-child{color:var(--muted)}
+.bill-line span:last-child{font-family:'Share Tech Mono';color:var(--text)}
+.bill-total{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:12px 0 0;margin-top:8px;
+  border-top:2px solid var(--border2);
+}
+.bill-total span:first-child{font-size:16px;font-weight:700;color:var(--text)}
+.bill-total span:last-child{font-family:'Share Tech Mono';font-size:22px;color:var(--cyan)}
+
+.modal-foot{
+  padding:16px 24px;border-top:1px solid var(--border);
+  display:flex;gap:12px;justify-content:flex-end;
+}
+.btn{
+  padding:9px 20px;border-radius:7px;font-family:'Rajdhani';
+  font-size:13px;font-weight:700;letter-spacing:1px;
+  cursor:pointer;transition:all 0.2s;border:1px solid;
+}
+.btn-ghost{
+  background:transparent;border-color:var(--border2);color:var(--muted);
+}
+.btn-ghost:hover{border-color:var(--text);color:var(--text)}
+.btn-primary{
+  background:rgba(0,212,255,0.1);border-color:var(--cyan);color:var(--cyan);
+}
+.btn-primary:hover{background:rgba(0,212,255,0.2)}
+.btn-dl{
+  background:rgba(0,230,118,0.1);border-color:var(--green);color:var(--green);
+}
+.btn-dl:hover{background:rgba(0,230,118,0.2)}
+
+/* rate input inline */
+.rate-row{
+  display:flex;align-items:center;gap:10px;margin-bottom:16px;
+  padding:12px 16px;background:var(--card);
+  border:1px solid var(--border);border-radius:8px;
+}
+.rate-row label{font-family:'Share Tech Mono';font-size:10px;color:var(--muted);letter-spacing:2px;white-space:nowrap}
+.rate-row input{
+  background:transparent;border:none;border-bottom:1px solid var(--border2);
+  color:var(--amber);font-family:'Share Tech Mono';font-size:14px;
+  padding:4px 8px;width:80px;outline:none;
+}
+.rate-row input:focus{border-bottom-color:var(--amber)}
+.rate-row span{font-family:'Share Tech Mono';font-size:11px;color:var(--muted)}
 </style>
 </head>
 <body>
-<div class="scanline"></div>
-<div class="page">
 
-<!-- HEADER -->
+<!-- ── HEADER ── -->
 <header>
-  <div class="logo">
-    <div class="logo-icon">⚡</div>
-    SMART <span>ENERGY</span> METER
+  <div class="brand">
+    <div class="brand-icon"></div>
+    <div>
+      <div class="brand-name">Energy Meter</div>
+      <div class="brand-sub">ESP8266 · PZEM-004T · FIREBASE</div>
+    </div>
   </div>
-  <div class="hright">
-    <span class="dot" id="wDot"></span>
-    <span id="wTxt" style="color:var(--sub2)">Connecting...</span>
-    <span style="color:var(--b2);margin:0 6px">|</span>
-    <span id="lastUpd" style="color:var(--sub)">--:--:--</span>
+  <div class="header-right">
+    <div id="live-pill" class="pill"><div class="dot"></div><span>CONNECTING</span></div>
+    <div id="last-upd">--</div>
+    <button class="bill-btn" onclick="openBill()">⬇ Download Bill</button>
   </div>
 </header>
 
-<!-- ALERT -->
-<div class="alert-box" id="alertBox">
-  ⚠ &nbsp;<span id="alertTxt"></span>
+<!-- ── FAULT BANNER ── -->
+<div id="fault-banner">
+  <span class="fault-ico">⚡</span>
+  <span id="fault-txt">PROTECTION TRIP</span>
+  <span style="margin-left:auto;font-size:10px;opacity:0.7">Relay auto-tripped — readings will restore when fault clears</span>
 </div>
 
-<!-- SENSOR READINGS -->
-<div class="mb">
-  <div class="stitle">📊 &nbsp;Live Sensor Readings</div>
+<!-- ── MAIN ── -->
+<main>
 
-  <!-- V I P PF Hz -->
-  <div class="sgrid">
-    <div class="scard">
-      <div class="cc"></div>
-      <div class="slbl">Voltage</div>
-      <div class="sval" id="v">--</div>
-      <div class="sunit">Volts (V)</div>
+  <!-- READINGS -->
+  <div class="sec-label">Live Readings</div>
+  <div class="metrics">
+
+    <div class="mcard" style="--cc:var(--cyan)">
+      <div class="mcard-icon">⚡</div>
+      <div class="mcard-label">Voltage</div>
+      <div class="mcard-val" id="v-voltage">--.--</div>
+      <div class="mcard-unit">VOLTS (V)</div>
     </div>
-    <div class="scard g">
-      <div class="cc"></div>
-      <div class="slbl">Current</div>
-      <div class="sval" id="i">--</div>
-      <div class="sunit">Amperes (A)</div>
+
+    <div class="mcard" style="--cc:var(--green)">
+      <div class="mcard-icon">〜</div>
+      <div class="mcard-label">Current</div>
+      <div class="mcard-val" id="v-current">--.--</div>
+      <div class="mcard-unit">AMPERES (A)</div>
     </div>
-    <div class="scard">
-      <div class="cc"></div>
-      <div class="slbl">Active Power</div>
-      <div class="sval" id="pw">--</div>
-      <div class="sunit">Watts (W)</div>
+
+    <div class="mcard" style="--cc:var(--amber)">
+      <div class="mcard-icon">◈</div>
+      <div class="mcard-label">Power</div>
+      <div class="mcard-val" id="v-power">--.--</div>
+      <div class="mcard-unit">WATTS (W)</div>
     </div>
-    <div class="scard w">
-      <div class="cc"></div>
-      <div class="slbl">Power Factor</div>
-      <div class="sval" id="pf">--</div>
-      <div class="sunit">cos φ</div>
+
+    <div class="mcard" style="--cc:var(--purple)">
+      <div class="mcard-icon">▦</div>
+      <div class="mcard-label">Energy</div>
+      <div class="mcard-val" id="v-energy">0.00000</div>
+      <div class="mcard-unit">KILOWATT-HOUR (kWh)</div>
+      <div class="cost-row">
+        Cost: <span class="cost-val" id="v-cost">₹0.00000</span>
+        <span style="margin-left:6px;font-size:9px" id="rate-display">@ ₹8.00/kWh</span>
+      </div>
     </div>
+
+    <div class="mcard" style="--cc:var(--red)">
+      <div class="mcard-icon">∿</div>
+      <div class="mcard-label">Frequency</div>
+      <div class="mcard-val" id="v-freq">--.--</div>
+      <div class="mcard-unit">HERTZ (Hz)</div>
+    </div>
+
+    <div class="mcard" style="--cc:var(--blue)">
+      <div class="mcard-icon">◎</div>
+      <div class="mcard-label">Power Factor</div>
+      <div class="mcard-val" id="v-pf">-.--</div>
+      <div class="mcard-unit">PF (0–1)</div>
+    </div>
+
   </div>
 
-  <!-- Frequency wide + Energy + Cost -->
-  <div class="wide-grid">
-    <div class="wide-card" style="padding:16px 20px;">
-      <div class="slbl" style="margin-bottom:6px;">Frequency</div>
-      <div class="sval" id="fr" style="font-size:1.6rem;color:var(--warn);">--</div>
-      <div class="sunit">Hertz (Hz)</div>
-    </div>
-    <div class="wide-card" style="padding:16px 20px;">
-      <div class="slbl" style="margin-bottom:6px;color:var(--sub2);">Apparent Power</div>
-      <div class="sval" id="ap" style="font-size:1.6rem;color:var(--acc);">--</div>
-      <div class="sunit">VA</div>
-    </div>
-  </div>
+  <!-- RELAY + CHART -->
+  <div class="bottom">
 
-  <!-- Energy + Cost — highlighted -->
-  <div class="wide-grid" style="margin-top:11px;">
-    <div class="wide-card">
-      <div class="wide-lbl">Energy Consumed</div>
-      <div class="wide-val" id="en">--</div>
-      <div class="wide-unit">Kilowatt-Hour (kWh)</div>
+    <div class="relay-card">
+      <div class="relay-title">
+        <span>Relay</span>
+        <span class="rbadge on" id="r-badge">ON</span>
+      </div>
+      <button class="rbtn on" id="r-btn" onclick="toggleRelay()">⏻</button>
+      <span class="rlabel" id="r-label">LOAD CONNECTED</span>
+      <div class="fault-box" id="r-fault">⚡ FAULT ACTIVE — manual control locked</div>
     </div>
-    <div class="wide-card cost">
-      <div class="wide-lbl">Total Cost</div>
-      <div class="wide-val" id="cost">--</div>
-      <div class="wide-unit">Indian Rupees (₹)</div>
-    </div>
-  </div>
-</div>
 
-<div class="divider"></div>
-
-<!-- RELAY CONTROL -->
-<div class="mb">
-  <div class="stitle">🔌 &nbsp;Relay Control — Main Supply</div>
-  <div class="relay-panel">
-
-    <div class="relay-status">
-      <div class="relay-info">
-        <div class="relay-icon on" id="relayIcon">🔌</div>
-        <div>
-          <div class="relay-title">MAIN SUPPLY</div>
-          <div class="relay-sub" id="relaySub">Auto + Manual control</div>
+    <div class="chart-card">
+      <div class="chart-hdr">
+        <div class="chart-title">Live Graph</div>
+        <div class="legend">
+          <div class="li"><div class="ld" style="background:var(--cyan)"></div>V ÷ 10</div>
+          <div class="li"><div class="ld" style="background:var(--green)"></div>A</div>
+          <div class="li"><div class="ld" style="background:var(--amber)"></div>W ÷ 100</div>
         </div>
       </div>
-      <div class="relay-badge on" id="relayBadge">ON</div>
-    </div>
-
-    <div class="btn-row">
-      <button class="btn-on active" id="btnOn" onclick="setRelay(true)">
-        ✅ &nbsp;TURN ON
-      </button>
-      <button class="btn-off" id="btnOff" onclick="setRelay(false)">
-        ⛔ &nbsp;TURN OFF
-      </button>
-    </div>
-
-    <div class="auto-note hidden" id="autoNote">
-      ⚠ Auto cut triggered — fault detected! Fix the fault to restore power,
-      or click TURN ON to manually override.
+      <canvas id="liveChart" height="150"></canvas>
     </div>
 
   </div>
-</div>
 
-<div class="divider"></div>
-
-<!-- SETTINGS -->
-<div class="mb">
-  <div class="stitle">⚙️ &nbsp;Protection Settings</div>
-  <div class="settings-panel">
-    <div class="sform">
-      <div class="fg">
-        <label class="flbl">Over Voltage Limit (V)</label>
-        <input type="number" class="finp" id="sOV" placeholder="e.g. 260"/>
+  <!-- THRESHOLDS -->
+  <div class="sec-label">Protection Thresholds (from Firebase /meter/settings)</div>
+  <div class="thresh-row">
+    <div class="tcard">
+      <div>
+        <div class="tcard-left">Over Voltage (OV)</div>
+        <div class="tcard-note">Relay trips above this</div>
       </div>
-      <div class="fg">
-        <label class="flbl">Under Voltage Limit (V)</label>
-        <input type="number" class="finp" id="sUV" placeholder="e.g. 180"/>
-      </div>
-      <div class="fg">
-        <label class="flbl">Over Current Limit (A)</label>
-        <input type="number" class="finp" id="sOC" placeholder="e.g. 10" step="0.1"/>
-      </div>
-      <div class="fg">
-        <label class="flbl">Rate per Unit (₹/kWh)</label>
-        <input type="number" class="finp" id="sRate" placeholder="e.g. 6.50" step="0.01"/>
-      </div>
+      <div class="tcard-val ov" id="t-ov">260 V</div>
     </div>
-    <button class="save-btn" onclick="saveSettings()">
-      💾 &nbsp;SAVE SETTINGS TO FIREBASE
-    </button>
-    <div class="save-msg" id="savemsg"></div>
+    <div class="tcard">
+      <div>
+        <div class="tcard-left">Under Voltage (UV)</div>
+        <div class="tcard-note">Relay trips below this</div>
+      </div>
+      <div class="tcard-val uv" id="t-uv">180 V</div>
+    </div>
+    <div class="tcard">
+      <div>
+        <div class="tcard-left">Over Current (OC)</div>
+        <div class="tcard-note">Relay trips above this</div>
+      </div>
+      <div class="tcard-val oc" id="t-oc">10 A</div>
+    </div>
   </div>
-</div>
 
-<footer>
-  SMART ENERGY METER G7 &nbsp;·&nbsp; FIREBASE REALTIME DB &nbsp;·&nbsp; v1.0<br/>
-  Final Year Project &nbsp;·&nbsp; vikasshettyhn2023-oss
-</footer>
+</main>
+
+<!-- ══════════════════════════════════
+     BILL MODAL
+══════════════════════════════════ -->
+<div class="modal-overlay" id="bill-modal">
+  <div class="modal">
+    <div class="modal-head">
+      <h2>⬇ Monthly Bill Generator</h2>
+      <button class="close-btn" onclick="closeBill()">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <!-- Rate setting -->
+      <div class="rate-row">
+        <label>Rate per kWh</label>
+        <input type="number" id="rate-input" value="8" step="0.01" min="0.01" oninput="calcBill()"/>
+        <span>₹ / kWh</span>
+        <span style="margin-left:auto;font-size:10px">BESCOM default ₹8.00</span>
+      </div>
+
+      <!-- Month / Year -->
+      <div class="form-row">
+        <div class="form-group">
+          <label>Month</label>
+          <select id="bill-month" onchange="calcBill()">
+            <option value="January">January</option>
+            <option value="February">February</option>
+            <option value="March">March</option>
+            <option value="April">April</option>
+            <option value="May" selected>May</option>
+            <option value="June">June</option>
+            <option value="July">July</option>
+            <option value="August">August</option>
+            <option value="September">September</option>
+            <option value="October">October</option>
+            <option value="November">November</option>
+            <option value="December">December</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Year</label>
+          <input type="number" id="bill-year" value="2026" min="2020" max="2099" oninput="calcBill()"/>
+        </div>
+      </div>
+
+      <!-- Readings -->
+      <div class="form-row">
+        <div class="form-group">
+          <label>Previous Reading (kWh)</label>
+          <input type="number" id="prev-read" value="0" step="0.00001" min="0" oninput="calcBill()" placeholder="Start of month"/>
+        </div>
+        <div class="form-group">
+          <label>Current Reading (kWh)</label>
+          <input type="number" id="curr-read" value="0" step="0.00001" min="0" oninput="calcBill()" placeholder="Auto from Firebase"/>
+        </div>
+      </div>
+
+      <!-- Customer details -->
+      <div class="form-row">
+        <div class="form-group">
+          <label>Customer Name</label>
+          <input type="text" id="cust-name" value="VS" placeholder="Your name"/>
+        </div>
+        <div class="form-group">
+          <label>Consumer No.</label>
+          <input type="text" id="cust-no" value="SEM-001" placeholder="Consumer number"/>
+        </div>
+      </div>
+
+      <!-- Bill Preview -->
+      <div class="bill-preview">
+        <h3>Bill Preview</h3>
+        <div class="bill-line"><span>Customer</span><span id="bp-name">VS</span></div>
+        <div class="bill-line"><span>Consumer No.</span><span id="bp-no">SEM-001</span></div>
+        <div class="bill-line"><span>Billing Period</span><span id="bp-period">May 2026</span></div>
+        <div class="bill-line"><span>Previous Reading</span><span id="bp-prev">0.00000 kWh</span></div>
+        <div class="bill-line"><span>Current Reading</span><span id="bp-curr">0.00000 kWh</span></div>
+        <div class="bill-line"><span>Units Consumed</span><span id="bp-units">0.00000 kWh</span></div>
+        <div class="bill-line"><span>Rate</span><span id="bp-rate">₹8.00 / kWh</span></div>
+        <div class="bill-line"><span>Energy Charges</span><span id="bp-energy-charge">₹0.00000</span></div>
+        <div class="bill-line"><span>Fixed Charges</span><span id="bp-fixed">₹50.00</span></div>
+        <div class="bill-line"><span>Taxes (18% GST)</span><span id="bp-tax">₹0.00000</span></div>
+        <div class="bill-total">
+          <span>Total Amount</span>
+          <span id="bp-total">₹0.00000</span>
+        </div>
+      </div>
+
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeBill()">Cancel</button>
+      <button class="btn btn-primary" onclick="calcBill()">↻ Recalculate</button>
+      <button class="btn btn-dl" onclick="downloadBill()">⬇ Download PDF</button>
+    </div>
+  </div>
 </div>
 
 <script>
-// ── FIREBASE CONFIG ───────────────────────
-const cfg = {
-  apiKey:            "AIzaSyCYQ2R_dOHa2MgVYvIuoGzZzo7hnKrqMQ4",
-  authDomain:        "smart-energy-meter-g7.firebaseapp.com",
-  databaseURL:       "https://smart-energy-meter-g7-default-rtdb.firebaseio.com",
-  projectId:         "smart-energy-meter-g7",
-  storageBucket:     "smart-energy-meter-g7.firebasestorage.app",
-  messagingSenderId: "1053683554755",
-  appId:             "1:1053683554755:web:cf24d65a9b2c187e3d4576"
+// ── Firebase ─────────────────────────────────────────────────
+const firebaseConfig = {
+  apiKey: "AIzaSyB7bhleg-rMrBmJDowrrV94fssdfaFqRRk",
+  authDomain: "smart-energy-meter-99c78.firebaseapp.com",
+  databaseURL: "https://smart-energy-meter-99c78-default-rtdb.firebaseio.com",
+  projectId: "smart-energy-meter-99c78",
+  storageBucket: "smart-energy-meter-99c78.firebasestorage.app",
+  messagingSenderId: "260206279575",
+  appId: "1:260206279575:web:c2dd2e06d11821665aa2d2"
 };
-firebase.initializeApp(cfg);
+firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-// ── HELPER ───────────────────────────────
-function sv(id, val, dec=2) {
-  const el = document.getElementById(id);
-  if (el) el.textContent = (isNaN(val)||val===null) ? '--' : parseFloat(val).toFixed(dec);
-}
+// ── State ────────────────────────────────────────────────────
+let relayState = true;
+let faultActive = false;
+let liveEnergy = 0;
+let ratePerUnit = 8.0;
+const MAX_PTS = 25;
+const labels=[], vData=[], aData=[], wData=[];
 
-// ── RELAY CONTROL ─────────────────────────
-function setRelay(state) {
-  db.ref('/relay/command').set(state);
-  updateRelayUI(state, false); // optimistic UI update
-}
-
-function updateRelayUI(state, autoTripped) {
-  const icon  = document.getElementById('relayIcon');
-  const badge = document.getElementById('relayBadge');
-  const btnOn = document.getElementById('btnOn');
-  const btnOff= document.getElementById('btnOff');
-  const sub   = document.getElementById('relaySub');
-  const note  = document.getElementById('autoNote');
-
-  // Icon
-  icon.className = 'relay-icon ' + (state ? 'on' : 'off');
-
-  // Badge
-  if (autoTripped && !state) {
-    badge.textContent = 'AUTO OFF';
-    badge.className   = 'relay-badge auto';
-    sub.textContent   = 'Auto cut — fault detected!';
-    note.className    = 'auto-note';
-  } else if (state) {
-    badge.textContent = 'ON';
-    badge.className   = 'relay-badge on';
-    sub.textContent   = 'Auto + Manual control';
-    note.className    = 'auto-note hidden';
-  } else {
-    badge.textContent = 'OFF';
-    badge.className   = 'relay-badge off';
-    sub.textContent   = 'Manually turned off';
-    note.className    = 'auto-note hidden';
+// ── Chart ─────────────────────────────────────────────────────
+const ctx = document.getElementById('liveChart').getContext('2d');
+const chart = new Chart(ctx,{
+  type:'line',
+  data:{
+    labels,
+    datasets:[
+      {label:'V/10', data:vData, borderColor:'#00d4ff', backgroundColor:'rgba(0,212,255,0.04)', borderWidth:1.5, pointRadius:0, tension:0.4, fill:true},
+      {label:'A',    data:aData, borderColor:'#00e676', backgroundColor:'rgba(0,230,118,0.04)', borderWidth:1.5, pointRadius:0, tension:0.4, fill:true},
+      {label:'W/100',data:wData, borderColor:'#ffab00', backgroundColor:'rgba(255,171,0,0.04)', borderWidth:1.5, pointRadius:0, tension:0.4, fill:true},
+    ]
+  },
+  options:{
+    responsive:true,animation:false,
+    plugins:{legend:{display:false}},
+    scales:{
+      x:{display:false},
+      y:{
+        grid:{color:'rgba(255,255,255,0.03)'},
+        ticks:{color:'#4d6070',font:{family:'Share Tech Mono',size:9}}
+      }
+    }
   }
-
-  // Buttons
-  btnOn.className  = state ? 'btn-on active'  : 'btn-on';
-  btnOff.className = state ? 'btn-off' : 'btn-off active';
-}
-
-// ── SAVE SETTINGS ─────────────────────────
-function saveSettings() {
-  const msg  = document.getElementById('savemsg');
-  const ov   = parseFloat(document.getElementById('sOV').value);
-  const uv   = parseFloat(document.getElementById('sUV').value);
-  const oc   = parseFloat(document.getElementById('sOC').value);
-  const rate = parseFloat(document.getElementById('sRate').value);
-
-  if (!ov || !uv || !oc) {
-    msg.style.color = 'var(--red)';
-    msg.textContent = '⚠ Fill all fields!';
-    return;
-  }
-  if (uv >= ov) {
-    msg.style.color = 'var(--red)';
-    msg.textContent = '⚠ Under voltage must be less than over voltage!';
-    return;
-  }
-
-  const u = { overVoltage: ov, underVoltage: uv, overCurrent: oc };
-  if (rate) u.ratePerUnit = rate;
-  db.ref('/settings').update(u);
-
-  msg.style.color = 'var(--grn)';
-  msg.textContent = '✓ Saved! ESP8266 applies in ~30 seconds.';
-  setTimeout(() => msg.textContent = '', 5000);
-}
-
-// ── LOAD SETTINGS ─────────────────────────
-function loadSettingsForm() {
-  db.ref('/settings').once('value', s => {
-    const d = s.val(); if (!d) return;
-    if (d.overVoltage)  document.getElementById('sOV').value   = d.overVoltage;
-    if (d.underVoltage) document.getElementById('sUV').value   = d.underVoltage;
-    if (d.overCurrent)  document.getElementById('sOC').value   = d.overCurrent;
-    if (d.ratePerUnit)  document.getElementById('sRate').value = d.ratePerUnit;
-  });
-}
-
-// ── FIREBASE LISTENERS ─────────────────────
-function listen() {
-
-  // Sensor data
-  db.ref('/sensor').on('value', s => {
-    const d = s.val(); if (!d) return;
-
-    sv('v',  d.voltage,   2);
-    sv('i',  d.current,   3);
-    sv('pw', d.power,     2);
-    sv('en', d.energy,    5);
-    sv('fr', d.frequency, 2);
-    sv('pf', d.pf,        3);
-    sv('cost',d.cost,     5);
-
-    // Apparent power = P / PF
-    const ap = (d.pf && d.pf > 0) ? (d.power / d.pf) : 0;
-    sv('ap', ap, 2);
-
-    // Update time
-    document.getElementById('lastUpd').textContent = new Date().toLocaleTimeString();
-    document.getElementById('wDot').className = 'dot';
-    document.getElementById('wTxt').textContent = 'Online';
-    document.getElementById('wTxt').style.color = 'var(--grn)';
-  });
-
-  // Relay state
-  db.ref('/relay').on('value', s => {
-    const d = s.val(); if (!d) return;
-    const state       = d.state !== false;
-    const autoTripped = d.autoTripped === true;
-    updateRelayUI(state, autoTripped);
-  });
-
-  // Alert
-  db.ref('/alerts/message').on('value', s => {
-    const msg = s.val() || '';
-    const box = document.getElementById('alertBox');
-    document.getElementById('alertTxt').textContent = msg;
-    box.className = 'alert-box' + (msg ? ' show' : '');
-  });
-}
-
-// ── START ─────────────────────────────────
-loadSettingsForm();
-listen();
-
-window.addEventListener('offline', () => {
-  document.getElementById('wDot').className = 'dot off';
-  document.getElementById('wTxt').textContent = 'Offline';
-  document.getElementById('wTxt').style.color = 'var(--red)';
 });
+
+// ── Helpers ──────────────────────────────────────────────────
+function setVal(id, val, dec=2){
+  const el = document.getElementById(id);
+  if(!el) return;
+  const s = (val===null||val===undefined||isNaN(val)) ? '--' : Number(val).toFixed(dec);
+  if(el.textContent !== s){
+    el.textContent = s;
+    el.classList.remove('updated');
+    void el.offsetWidth;
+    el.classList.add('updated');
+  }
+}
+
+function updateRelayUI(on){
+  const btn   = document.getElementById('r-btn');
+  const badge = document.getElementById('r-badge');
+  const label = document.getElementById('r-label');
+  btn.className   = 'rbtn ' + (on ? 'on' : 'off');
+  badge.className = 'rbadge ' + (on ? 'on' : 'off');
+  badge.textContent  = on ? 'ON' : 'OFF';
+  label.textContent  = on ? 'LOAD CONNECTED' : 'LOAD DISCONNECTED';
+}
+
+// ── Toggle relay ──────────────────────────────────────────────
+function toggleRelay(){
+  if(faultActive) return;
+  const next = !relayState;
+  db.ref('/meter/commands/relay').set(next).then(()=>{
+    relayState = next;
+    updateRelayUI(next);
+  });
+}
+
+// ── PZEM listener ────────────────────────────────────────────
+db.ref('/meter/pzem').on('value', snap=>{
+  const d = snap.val(); if(!d) return;
+
+  setVal('v-voltage',  d.voltage,  2);
+  setVal('v-current',  d.current,  2);
+  setVal('v-power',    d.power,    2);
+  setVal('v-freq',     d.frequency,2);
+  setVal('v-pf',       d.pf,       2);
+
+  // Energy — 5 decimal places
+  const en = parseFloat(d.energy) || 0;
+  liveEnergy = en;
+  document.getElementById('v-energy').textContent = en.toFixed(5);
+  document.getElementById('v-energy').classList.remove('updated');
+  void document.getElementById('v-energy').offsetWidth;
+  document.getElementById('v-energy').classList.add('updated');
+
+  // Cost — 5 decimal places
+  ratePerUnit = parseFloat(document.getElementById('rate-input')?.value) || 8;
+  const cost = en * ratePerUnit;
+  document.getElementById('v-cost').textContent  = '₹' + cost.toFixed(5);
+  document.getElementById('rate-display').textContent = '@ ₹' + ratePerUnit.toFixed(2) + '/kWh';
+
+  // chart
+  const t = new Date().toLocaleTimeString();
+  labels.push(t);
+  vData.push((d.voltage||0)/10);
+  aData.push(d.current||0);
+  wData.push((d.power||0)/100);
+  if(labels.length > MAX_PTS){labels.shift();vData.shift();aData.shift();wData.shift();}
+  chart.update();
+
+  // status
+  const pill = document.getElementById('live-pill');
+  pill.innerHTML = '<div class="dot"></div><span>LIVE</span>';
+  pill.className = 'pill live';
+  document.getElementById('last-upd').textContent = 'Updated ' + t;
+
+  // auto-fill current reading in bill form
+  document.getElementById('curr-read').value = en.toFixed(5);
+  calcBill();
+});
+
+// ── Relay listener ────────────────────────────────────────────
+db.ref('/meter/relay').on('value', snap=>{
+  const d = snap.val(); if(!d) return;
+  relayState  = d.state !== false;
+  faultActive = d.fault === true;
+  updateRelayUI(relayState);
+
+  // fault banner
+  const banner = document.getElementById('fault-banner');
+  banner.style.display = faultActive ? 'flex' : 'none';
+  if(faultActive) document.getElementById('fault-txt').textContent = '⚡ ' + (d.faultReason||'FAULT') + ' — Relay auto-tripped';
+  document.getElementById('r-fault').style.display = faultActive ? 'block' : 'none';
+
+  // thresholds from relay node
+  if(d.ov_threshold) document.getElementById('t-ov').textContent = d.ov_threshold + ' V';
+  if(d.uv_threshold) document.getElementById('t-uv').textContent = d.uv_threshold + ' V';
+  if(d.oc_threshold) document.getElementById('t-oc').textContent = d.oc_threshold + ' A';
+});
+
+// ── Settings listener (thresholds) ───────────────────────────
+db.ref('/meter/settings').on('value', snap=>{
+  const d = snap.val(); if(!d) return;
+  if(d.ov_threshold) document.getElementById('t-ov').textContent = d.ov_threshold + ' V';
+  if(d.uv_threshold) document.getElementById('t-uv').textContent = d.uv_threshold + ' V';
+  if(d.oc_threshold) document.getElementById('t-oc').textContent = d.oc_threshold + ' A';
+});
+
+// ── Firebase connected ────────────────────────────────────────
+db.ref('.info/connected').on('value', snap=>{
+  if(!snap.val()){
+    const pill = document.getElementById('live-pill');
+    pill.innerHTML = '<div class="dot"></div><span>OFFLINE</span>';
+    pill.className = 'pill err';
+  }
+});
+
+// ══════════════════════════════════════════════════════════════
+// BILL MODAL
+// ══════════════════════════════════════════════════════════════
+function openBill(){
+  document.getElementById('bill-modal').classList.add('open');
+  // set current month/year
+  const now = new Date();
+  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('bill-month').value = months[now.getMonth()];
+  document.getElementById('bill-year').value  = now.getFullYear();
+  calcBill();
+}
+
+function closeBill(){
+  document.getElementById('bill-modal').classList.remove('open');
+}
+
+// close on overlay click
+document.getElementById('bill-modal').addEventListener('click', function(e){
+  if(e.target === this) closeBill();
+});
+
+function calcBill(){
+  const rate   = parseFloat(document.getElementById('rate-input')?.value) || 8;
+  const prev   = parseFloat(document.getElementById('prev-read')?.value)  || 0;
+  const curr   = parseFloat(document.getElementById('curr-read')?.value)  || liveEnergy;
+  const month  = document.getElementById('bill-month')?.value  || 'May';
+  const year   = document.getElementById('bill-year')?.value   || '2026';
+  const name   = document.getElementById('cust-name')?.value   || 'VS';
+  const no     = document.getElementById('cust-no')?.value     || 'SEM-001';
+
+  const units  = Math.max(0, curr - prev);
+  const energy_charge = units * rate;
+  const fixed  = 50;
+  const gst    = (energy_charge + fixed) * 0.18;
+  const total  = energy_charge + fixed + gst;
+
+  ratePerUnit  = rate;
+  document.getElementById('rate-display').textContent = '@ ₹' + rate.toFixed(2) + '/kWh';
+  document.getElementById('v-cost').textContent = '₹' + (liveEnergy * rate).toFixed(5);
+
+  // update preview
+  document.getElementById('bp-name').textContent          = name;
+  document.getElementById('bp-no').textContent            = no;
+  document.getElementById('bp-period').textContent        = month + ' ' + year;
+  document.getElementById('bp-prev').textContent          = prev.toFixed(5) + ' kWh';
+  document.getElementById('bp-curr').textContent          = curr.toFixed(5) + ' kWh';
+  document.getElementById('bp-units').textContent         = units.toFixed(5) + ' kWh';
+  document.getElementById('bp-rate').textContent          = '₹' + rate.toFixed(2) + ' / kWh';
+  document.getElementById('bp-energy-charge').textContent = '₹' + energy_charge.toFixed(5);
+  document.getElementById('bp-fixed').textContent         = '₹' + fixed.toFixed(2);
+  document.getElementById('bp-tax').textContent           = '₹' + gst.toFixed(5);
+  document.getElementById('bp-total').textContent         = '₹' + total.toFixed(5);
+}
+
+// ── Download Bill as PDF ──────────────────────────────────────
+function downloadBill(){
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit:'mm', format:'a4' });
+
+  const rate   = parseFloat(document.getElementById('rate-input').value) || 8;
+  const prev   = parseFloat(document.getElementById('prev-read').value)  || 0;
+  const curr   = parseFloat(document.getElementById('curr-read').value)  || liveEnergy;
+  const month  = document.getElementById('bill-month').value;
+  const year   = document.getElementById('bill-year').value;
+  const name   = document.getElementById('cust-name').value || 'VS';
+  const no     = document.getElementById('cust-no').value   || 'SEM-001';
+
+  const units   = Math.max(0, curr - prev);
+  const ec      = units * rate;
+  const fixed   = 50;
+  const gst     = (ec + fixed) * 0.18;
+  const total   = ec + fixed + gst;
+
+  const W = 210;
+  let y = 0;
+
+  // Header band
+  doc.setFillColor(10,20,35);
+  doc.rect(0, 0, W, 38, 'F');
+
+  doc.setTextColor(0,212,255);
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(20);
+  doc.text('SMART ENERGY METER', 14, 16);
+
+  doc.setTextColor(150,180,200);
+  doc.setFont('helvetica','normal');
+  doc.setFontSize(9);
+  doc.text('ELECTRICITY BILL', 14, 24);
+  doc.text('ESP8266 · PZEM-004T · Firebase', 14, 30);
+
+  doc.setTextColor(0,212,255);
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(13);
+  doc.text(month.toUpperCase() + ' ' + year, W-14, 20, {align:'right'});
+
+  doc.setTextColor(150,180,200);
+  doc.setFont('helvetica','normal');
+  doc.setFontSize(9);
+  doc.text('Generated: ' + new Date().toLocaleString(), W-14, 30, {align:'right'});
+
+  y = 46;
+
+  // Consumer Info box
+  doc.setFillColor(17,24,35);
+  doc.setDrawColor(30,40,55);
+  doc.rect(14, y, W-28, 28, 'FD');
+
+  doc.setTextColor(80,120,150);
+  doc.setFontSize(8);
+  doc.text('CUSTOMER NAME', 20, y+8);
+  doc.text('CONSUMER NUMBER', W/2+4, y+8);
+  doc.text('BILLING PERIOD', 20, y+20);
+  doc.text('BILL DATE', W/2+4, y+20);
+
+  doc.setTextColor(200,215,230);
+  doc.setFontSize(11);
+  doc.setFont('helvetica','bold');
+  doc.text(name, 20, y+14);
+  doc.text(no, W/2+4, y+14);
+  doc.text(month + ' ' + year, 20, y+26);
+  doc.text(new Date().toLocaleDateString('en-IN'), W/2+4, y+26);
+
+  y += 36;
+
+  // Readings section
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(10);
+  doc.setTextColor(0,212,255);
+  doc.text('METER READINGS', 14, y);
+  y += 4;
+
+  // reading bar
+  doc.setFillColor(17,24,35);
+  doc.setDrawColor(30,40,55);
+  doc.rect(14, y, W-28, 22, 'FD');
+
+  doc.setFont('helvetica','normal');
+  doc.setTextColor(80,120,150);
+  doc.setFontSize(8);
+  doc.text('PREVIOUS READING', 20, y+6);
+  doc.text('CURRENT READING', 80, y+6);
+  doc.text('UNITS CONSUMED', 145, y+6);
+
+  doc.setTextColor(200,215,230);
+  doc.setFont('courier','bold');
+  doc.setFontSize(12);
+  doc.text(prev.toFixed(5) + ' kWh', 20, y+16);
+  doc.text(curr.toFixed(5) + ' kWh', 80, y+16);
+  doc.setTextColor(0,230,118);
+  doc.text(units.toFixed(5) + ' kWh', 145, y+16);
+
+  y += 30;
+
+  // Charges table
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(10);
+  doc.setTextColor(0,212,255);
+  doc.text('CHARGES BREAKDOWN', 14, y);
+  y += 4;
+
+  const rows = [
+    ['Energy Charges', `${units.toFixed(5)} kWh × ₹${rate.toFixed(2)}`, '₹' + ec.toFixed(5)],
+    ['Fixed Charges',  'Monthly fixed charge',                           '₹' + fixed.toFixed(2)],
+    ['GST (18%)',      'On energy + fixed charges',                      '₹' + gst.toFixed(5)],
+  ];
+
+  rows.forEach((row, i) => {
+    const fill = i%2===0 ? [17,24,35] : [13,20,30];
+    doc.setFillColor(...fill);
+    doc.setDrawColor(30,40,55);
+    doc.rect(14, y, W-28, 12, 'FD');
+
+    doc.setFont('helvetica','normal');
+    doc.setTextColor(200,215,230);
+    doc.setFontSize(10);
+    doc.text(row[0], 20, y+8);
+
+    doc.setTextColor(80,120,150);
+    doc.setFontSize(9);
+    doc.text(row[1], 80, y+8);
+
+    doc.setFont('courier','bold');
+    doc.setTextColor(200,215,230);
+    doc.setFontSize(10);
+    doc.text(row[2], W-20, y+8, {align:'right'});
+
+    y += 12;
+  });
+
+  // Total band
+  doc.setFillColor(0,50,60);
+  doc.setDrawColor(0,212,255);
+  doc.rect(14, y, W-28, 18, 'FD');
+
+  doc.setFont('helvetica','bold');
+  doc.setTextColor(0,212,255);
+  doc.setFontSize(12);
+  doc.text('TOTAL AMOUNT DUE', 20, y+11);
+
+  doc.setFont('courier','bold');
+  doc.setTextColor(0,230,118);
+  doc.setFontSize(16);
+  doc.text('₹' + total.toFixed(5), W-20, y+12, {align:'right'});
+
+  y += 26;
+
+  // Footer
+  doc.setFillColor(10,20,35);
+  doc.rect(0, 277, W, 20, 'F');
+  doc.setFont('helvetica','normal');
+  doc.setTextColor(80,120,150);
+  doc.setFontSize(8);
+  doc.text('Generated by Smart Energy Meter Dashboard  ·  ESP8266 + PZEM-004T + Firebase', W/2, 286, {align:'center'});
+  doc.text('This is a computer generated bill — no signature required', W/2, 292, {align:'center'});
+
+  doc.save('SmartMeter_Bill_' + month + '_' + year + '.pdf');
+}
+
+// ── Month picker default current month ───────────────────────
+(function(){
+  const months=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const now = new Date();
+  document.getElementById('bill-month').value = months[now.getMonth()];
+  document.getElementById('bill-year').value  = now.getFullYear();
+})();
 </script>
 </body>
 </html>
